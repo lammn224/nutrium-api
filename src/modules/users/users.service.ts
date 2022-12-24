@@ -92,8 +92,6 @@ export class UsersService {
   async register(user: RegisterDto): Promise<User> {
     const newUser = await this.userModel.create({
       ...user,
-      fullName: user.fullName,
-      status: UserStatus.inactive,
     });
 
     return pick(newUser, ['_id', 'email', 'fullName', 'status']);
@@ -182,14 +180,7 @@ export class UsersService {
   }
 
   async me(userId) {
-    const user = await this.userModel.findOne({ _id: userId }).populate({
-      path: 'role',
-      select: '_id name',
-      populate: {
-        path: 'permissions',
-        select: '-createdAt -updatedAt',
-      },
-    });
+    const user = await this.userModel.findOne({ _id: userId });
 
     return user;
   }

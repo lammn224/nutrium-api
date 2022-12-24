@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, ObjectId } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { UserStatus } from './enum/user.enum';
 import { ApiProperty } from '@nestjs/swagger';

@@ -28,6 +28,8 @@ import { AuthApiError } from '@/decorators/api-error-response.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Roles } from '@/decorators/roles.decorator';
+import { Role } from '@/enums/role.enum';
 
 @ApiExtraModels(PaginationDto)
 @ApiBearerAuth()
@@ -43,6 +45,7 @@ export class UsersController {
     return await this.usersService.me(req.user._id);
   }
 
+  @Roles(Role.Admin)
   @PaginationResponse(User)
   @ApiOperation({ summary: 'User list with filter' })
   @AuthApiError()
@@ -56,7 +59,6 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: User })
-  @ApiOperation({ summary: 'Get a user' })
   @AuthApiError()
   @ApiOperation({ summary: 'Get a user' })
   @Get(':id')
