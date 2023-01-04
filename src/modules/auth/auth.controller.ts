@@ -5,13 +5,12 @@ import { LoginDto } from './dto/login.dto';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
-  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
-import { User } from '../users/user.schema';
+import { SchoolUser } from '../school-users/school-user.schema';
 import { Public } from '@/decorators/public.decorator';
 import { CacheService } from '../cache/cache.service';
 import { TOKEN_BLACK_LIST } from '@/constants/cache.constant';
@@ -29,7 +28,7 @@ import {
   AuthApiError,
   PublicApiError,
 } from '@/decorators/api-error-response.decorator';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { RegisterResponseDto } from './dto/register-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -39,6 +38,17 @@ export class AuthController {
     private cacheService: CacheService,
     private configService: ConfigService,
   ) {}
+
+  @Public()
+  @PublicApiError()
+  @ApiCreatedResponse({ type: RegisterResponseDto })
+  @ApiOperation({ summary: 'Register' })
+  @Post('register')
+  async register(@Body() registerDto: RegisterDto) {
+    const res = await this.authService.register(registerDto);
+
+    return res;
+  }
 
   @Public()
   @UseGuards(LocalAuthGuard)
@@ -51,14 +61,15 @@ export class AuthController {
   )
   @ApiOkResponse({ type: LoginResponseDto })
   @PublicApiError()
+  @ApiOperation({ summary: 'Login' })
   @Post('login')
   async login(
     @Request() req,
     @Body() loginDto: LoginDto,
   ): Promise<LoginResponseDto> {
-    const user = await this.authService.login(req.user);
+    const token = await this.authService.login(req.user);
 
-    return user;
+    return token;
   }
 
   @ApiBearerAuth()
@@ -80,15 +91,5 @@ export class AuthController {
         }
       }
     }
-  }
-
-  @Public()
-  @ApiCreatedResponse({ type: User })
-  @PublicApiError()
-  @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
-    const user = await this.authService.register(registerDto);
-
-    return user;
   }
 }

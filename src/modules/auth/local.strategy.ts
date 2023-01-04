@@ -8,18 +8,19 @@ import { ERROR_CODES } from '@/constants/error-codes.constant';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
-      usernameField: 'email',
+      usernameField: 'username',
       passwordField: 'password',
       passReqToCallback: true,
     });
   }
 
-  async validate(
-    request: Request,
-    email: string,
-    password: string,
-  ): Promise<any> {
-    const checkInfo = await this.authService.validateUser(email, password);
+  async validate(request, username: string, password: string): Promise<any> {
+    const { school } = request.body;
+    const checkInfo = await this.authService.validateSchoolUser({
+      username,
+      password,
+      school,
+    });
 
     if (!checkInfo.canReturnToken) {
       throw new UnauthorizedException({
@@ -28,6 +29,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       });
     }
 
-    return checkInfo.user;
+    return checkInfo.schoolUser;
   }
 }

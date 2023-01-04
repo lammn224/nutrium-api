@@ -1,30 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { SchoolUsersService } from '../school-users/school-users.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/user.schema';
+import { SchoolUser } from '../school-users/school-user.schema';
 import { RegisterDto } from './dto/register.dto';
+import { SchoolsService } from '../schools/schools.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    private schoolUsersService: SchoolUsersService,
+    private schoolService: SchoolsService,
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
-    const checkInfo = await this.usersService.attempt(email, pass);
+  async validateSchoolUser({
+    username,
+    password,
+    school,
+  }: LoginDto): Promise<any> {
+    const checkInfo = await this.schoolUsersService.attempt(
+      username,
+      password,
+      school,
+    );
 
     if (checkInfo.canReturnToken) {
-      delete checkInfo.user.password;
+      delete checkInfo.schoolUser.password;
     }
 
     return checkInfo;
   }
 
-  async login(user: User) {
+  async login(user: SchoolUser) {
     const payload = {
-      email: user.email,
+      username: user.username,
       _id: user._id,
+      shcool: user.school,
       role: user.role,
       sub: user._id,
     };
@@ -37,8 +49,11 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const result = await this.usersService.register(registerDto);
+    const { school, owner } = await this.schoolService.createSchool(
+      registerDto,
+    );
 
-    return result;
+    const { access_token } = await this.login(owner);
+    return { school, owner, access_token };
   }
 }

@@ -4,19 +4,16 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users.service';
+import { SchoolsService } from '../schools.service';
 
-@ValidatorConstraint({ name: 'isEmailAlreadyExist', async: false })
+@ValidatorConstraint({ name: 'isSchoolAlreadyExist', async: false })
 @Injectable()
-export class IsUserAlreadyExist implements ValidatorConstraintInterface {
-  constructor(private readonly userService: UsersService) {}
+export class IsSchoolAlreadyExist implements ValidatorConstraintInterface {
+  constructor(private readonly schoolService: SchoolsService) {}
 
   async validate(value: string, validationArguments: ValidationArguments) {
-    // @ts-ignore
-    const id = validationArguments.object?.context?.params?.id;
     const key = validationArguments.property;
-    const result = await this.userService.checkExist(key, value, id);
-
+    const result = await this.schoolService.checkExist(key, value);
     return !result;
   }
 

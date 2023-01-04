@@ -11,7 +11,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { SchoolUsersModule } from './modules/school-users/school-users.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -21,6 +21,7 @@ import { TokenBlacklistMiddleware } from './middlewares/token-blacklist.middlewa
 import { RolesGuard } from './guards/roles.guard';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ListenersModule } from './listeners/listeners.module';
+import { SchoolsModule } from './modules/schools/schools.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -51,9 +52,10 @@ import { ListenersModule } from './listeners/listeners.module';
     }),
     EventEmitterModule.forRoot(),
     AuthModule,
-    UsersModule,
+    SchoolUsersModule,
     CacheCustomModule,
     ListenersModule,
+    SchoolsModule,
   ],
   controllers: [AppController],
   providers: [
