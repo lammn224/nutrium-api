@@ -14,6 +14,9 @@ export const USER_ALREADY_ACTIVE = 'USER_ALREADY_ACTIVE';
 export const USER_ALREADY_BLOCKED = 'USER_ALREADY_BLOCKED';
 export const USERNAME_ALREADY_EXIST = 'USERNAME_ALREADY_EXIST';
 
+//FOOD
+export const FOOD_NOT_EXIST = 'FOOD_NOT_EXIST';
+
 export const ERROR_CODES = new Map<string, string>([
   [DATA_REFERENCE, 'Data reference'],
 
@@ -29,4 +32,6 @@ export const ERROR_CODES = new Map<string, string>([
   [USER_ALREADY_ACTIVE, 'User already active.'],
   [USER_ALREADY_BLOCKED, 'User already blocked.'],
   [USERNAME_ALREADY_EXIST, 'Username already exist.'],
+
+  [FOOD_NOT_EXIST, 'Food is not exist'],
 ]);

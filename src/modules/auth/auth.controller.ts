@@ -10,7 +10,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
-import { SchoolUser } from '../school-users/school-user.schema';
 import { Public } from '@/decorators/public.decorator';
 import { CacheService } from '../cache/cache.service';
 import { TOKEN_BLACK_LIST } from '@/constants/cache.constant';

@@ -22,6 +22,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ListenersModule } from './listeners/listeners.module';
 import { SchoolsModule } from './modules/schools/schools.module';
+import { FoodsModule } from './modules/foods/foods.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -56,6 +57,7 @@ import { SchoolsModule } from './modules/schools/schools.module';
     CacheCustomModule,
     ListenersModule,
     SchoolsModule,
+    FoodsModule,
   ],
   controllers: [AppController],
   providers: [
