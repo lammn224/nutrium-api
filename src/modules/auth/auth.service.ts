@@ -5,22 +5,26 @@ import { SchoolUser } from '../school-users/school-user.schema';
 import { RegisterDto } from './dto/register.dto';
 import { SchoolsService } from '../schools/schools.service';
 import { LoginDto } from './dto/login.dto';
+import { StudentLoginDto } from '@/modules/auth/dto/login-students.dto';
+import { Student } from '@/modules/students/students.schema';
+import { StudentsService } from '@/modules/students/students.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private schoolUsersService: SchoolUsersService,
+    private studentService: StudentsService,
     private schoolService: SchoolsService,
     private jwtService: JwtService,
   ) {}
 
   async validateSchoolUser({
-    username,
+    phoneNumber,
     password,
     school,
   }: LoginDto): Promise<any> {
     const checkInfo = await this.schoolUsersService.attempt(
-      username,
+      phoneNumber,
       password,
       school,
     );
@@ -32,11 +36,45 @@ export class AuthService {
     return checkInfo;
   }
 
+  async validateStudent({
+    studentId,
+    password,
+    school,
+  }: StudentLoginDto): Promise<any> {
+    const checkInfo = await this.studentService.attempt(
+      studentId,
+      password,
+      school,
+    );
+
+    if (checkInfo.canReturnToken) {
+      delete checkInfo.student.password;
+    }
+
+    return checkInfo;
+  }
+
   async login(user: SchoolUser) {
     const payload = {
-      username: user.username,
+      phoneNumber: user.phoneNumber,
       _id: user._id,
-      shcool: user.school,
+      school: user.school,
+      role: user.role,
+      sub: user._id,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload, {
+        expiresIn: parseInt(process.env.JWT_TTL),
+      }),
+    };
+  }
+
+  async studentLogin(user: Student) {
+    const payload = {
+      studentId: user.studentId,
+      _id: user._id,
+      school: user.school,
       role: user.role,
       sub: user._id,
     };

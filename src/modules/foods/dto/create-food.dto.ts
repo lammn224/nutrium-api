@@ -7,4 +7,8 @@ export class CreateFoodDto extends PickType(Food, [
   'protein',
   'lipid',
   'glucid',
+  'ca',
+  'fe',
+  'zn',
+  'fiber',
 ]) {}

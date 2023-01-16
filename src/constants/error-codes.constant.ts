@@ -14,8 +14,12 @@ export const USER_ALREADY_ACTIVE = 'USER_ALREADY_ACTIVE';
 export const USER_ALREADY_BLOCKED = 'USER_ALREADY_BLOCKED';
 export const USERNAME_ALREADY_EXIST = 'USERNAME_ALREADY_EXIST';
 
+export const SCHOOL_NOT_EXIST = 'SCHOOL_NOT_EXIST';
+
 //FOOD
 export const FOOD_NOT_EXIST = 'FOOD_NOT_EXIST';
+
+export const UPLOAD_FAILED = 'UPLOAD_FAILED';
 
 export const ERROR_CODES = new Map<string, string>([
   [DATA_REFERENCE, 'Data reference'],
@@ -33,5 +37,9 @@ export const ERROR_CODES = new Map<string, string>([
   [USER_ALREADY_BLOCKED, 'User already blocked.'],
   [USERNAME_ALREADY_EXIST, 'Username already exist.'],
 
+  [SCHOOL_NOT_EXIST, 'School is not exist'],
+
   [FOOD_NOT_EXIST, 'Food is not exist'],
+
+  [UPLOAD_FAILED, 'Upload fail, please check data again'],
 ]);

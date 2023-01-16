@@ -8,6 +8,8 @@ import { LocalStrategy } from './local.strategy';
 import { AuthController } from './auth.controller';
 import { SchoolsModule } from '../schools/schools.module';
 import { AuthValidationMiddleware } from './middlewares/auth-validation-middleware';
+import { StudentsLocalStrategy } from '@/modules/auth/students-local.strategy';
+import { StudentsModule } from '@/modules/students/students.module';
 
 @Module({
   imports: [
@@ -21,8 +23,9 @@ import { AuthValidationMiddleware } from './middlewares/auth-validation-middlewa
       inject: [ConfigService],
     }),
     SchoolsModule,
+    StudentsModule,
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, StudentsLocalStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

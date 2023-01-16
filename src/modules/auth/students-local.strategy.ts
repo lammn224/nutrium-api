@@ -5,19 +5,22 @@ import { AuthService } from './auth.service';
 import { ERROR_CODES } from '@/constants/error-codes.constant';
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class StudentsLocalStrategy extends PassportStrategy(
+  Strategy,
+  'student-local',
+) {
   constructor(private authService: AuthService) {
     super({
-      usernameField: 'phoneNumber',
+      usernameField: 'studentId',
       passwordField: 'password',
       passReqToCallback: true,
     });
   }
 
-  async validate(request, phoneNumber: string, password: string): Promise<any> {
+  async validate(request, studentId: string, password: string): Promise<any> {
     const { school } = request.body;
-    const checkInfo = await this.authService.validateSchoolUser({
-      phoneNumber,
+    const checkInfo = await this.authService.validateStudent({
+      studentId,
       password,
       school,
     });
@@ -29,6 +32,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       });
     }
 
-    return checkInfo.schoolUser;
+    return checkInfo.student;
   }
 }

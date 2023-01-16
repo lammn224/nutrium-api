@@ -1,13 +1,16 @@
-import { OverrideMethods } from '@/constants/override-method.constant';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
 import mongoose, { Document, ObjectId } from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import {
+  SchoolUser,
+  SchoolUserSchema,
+} from '@/modules/school-users/school-user.schema';
+import { School } from '@/modules/schools/schools.schema';
 import * as MongooseDelete from 'mongoose-delete';
-import { SchoolUser } from '../school-users/school-user.schema';
+import { OverrideMethods } from '@/constants/override-method.constant';
 
-export type SchoolDocument = School & Document;
-
+export type ClassesDocument = Classes & Document;
 @Schema({
   timestamps: {
     createdAt: 'createdAt',
@@ -15,24 +18,24 @@ export type SchoolDocument = School & Document;
     currentTime: () => Date.now(),
   },
 })
-export class School {
+export class Classes {
   @ApiProperty({ type: String, required: true })
   _id: string | ObjectId;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'SchoolUser' })
-  createdBy: string | SchoolUser;
 
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String, required: true })
   @Prop({ type: String, required: true, unique: true, index: true })
-  code: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({ type: String, required: true })
-  @Prop({ type: String, required: true })
   name: string;
+
+  @IsArray()
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: School.name })
+  members: SchoolUser[];
+
+  @IsString()
+  @ApiProperty({ type: String })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: School.name })
+  school: string | School;
 
   @Prop({ type: Number })
   createdAt: number;
@@ -44,22 +47,22 @@ export class School {
   deletedAt?: number;
 }
 
-export const SchoolSchema = SchemaFactory.createForClass(School);
+export const ClassesSchema = SchemaFactory.createForClass(Classes);
 
-SchoolSchema.plugin(MongooseDelete, {
+SchoolUserSchema.plugin(MongooseDelete, {
   deletedAt: { type: Number },
   deleted: true,
   overrideMethods: OverrideMethods,
 });
 
-SchoolSchema.set('toJSON', {
+ClassesSchema.set('toJSON', {
   transform: function (doc, ret, opt) {
     delete ret['__v'];
     return ret;
   },
 });
 
-SchoolSchema.set('toObject', {
+ClassesSchema.set('toObject', {
   transform: function (doc, ret, opt) {
     delete ret['__v'];
     return ret;

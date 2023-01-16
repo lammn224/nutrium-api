@@ -1,13 +1,12 @@
 import { IsNotEmpty, IsString, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsObjectId } from '@/dtos/valdation/is-objectId';
-import { School } from '@/modules/schools/schools.schema';
 
-export class LoginDto {
+export class StudentLoginDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String, required: true })
-  phoneNumber: string;
+  studentId: string;
 
   @IsNotEmpty()
   @IsString()
@@ -18,5 +17,5 @@ export class LoginDto {
   @IsString()
   @Validate(IsObjectId)
   @ApiProperty({ type: String, required: true })
-  school: string | School;
+  school: string;
 }

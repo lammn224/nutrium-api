@@ -45,8 +45,8 @@ async function bootstrap() {
 
   // swagger
   const configSwagger = new DocumentBuilder()
-    .setTitle('VRClass API')
-    .setDescription('VRClass API document page')
+    .setTitle('Nutrium API')
+    .setDescription('Nutrium API document page')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

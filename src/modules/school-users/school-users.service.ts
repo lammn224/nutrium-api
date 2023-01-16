@@ -12,6 +12,7 @@ import { UserStatus } from './enum/user-status.enum';
 import { throwNotFound } from '@/utils/exception.utils';
 import { CreateSchoolUserDto } from './dto/create-school-user.dto';
 import { Role } from '@/enums/role.enum';
+import { CreateParentsDto } from '@/modules/school-users/dto/create-parents.dto';
 
 @Injectable()
 export class SchoolUsersService {
@@ -20,6 +21,19 @@ export class SchoolUsersService {
     private schoolUserModel: Model<SchoolUserDocument>,
   ) {}
 
+  async createParents(createParentsDto: CreateParentsDto) {
+    const isExistedParents = await this.schoolUserModel.findOne({
+      phoneNumber: createParentsDto.phoneNumber,
+    });
+    if (isExistedParents) return isExistedParents;
+
+    const newParents = await this.schoolUserModel.create({
+      ...createParentsDto,
+    });
+
+    return newParents;
+  }
+
   async createSchoolOwner(
     school: string,
     createSchoolUserDto: CreateSchoolUserDto,
@@ -27,7 +41,6 @@ export class SchoolUsersService {
     const owner = await this.schoolUserModel.create({
       school,
       ...createSchoolUserDto,
-      dateOfBirth: 0,
       role: Role.Admin,
     });
 
@@ -44,8 +57,11 @@ export class SchoolUsersService {
     return schoolUser;
   }
 
-  async attempt(username: string, password: string, school: string) {
-    const schoolUser = await this.schoolUserModel.findOne({ username, school });
+  async attempt(phoneNumber, password, school) {
+    const schoolUser = await this.schoolUserModel.findOne({
+      school,
+      phoneNumber,
+    });
 
     let result = {
       status: USER_NOT_EXIST_OR_DELETED,

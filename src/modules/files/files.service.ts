@@ -8,6 +8,14 @@ import imageSizesConstants from '@/constants/image-sizes.constants';
 import * as mm from 'music-metadata';
 import { Readable } from 'stream';
 import { Express } from 'express';
+import * as Excel from 'exceljs';
+import { SchoolUsersService } from '@/modules/school-users/school-users.service';
+import { ClassesService } from '@/modules/classes/classes.service';
+import { StudentsService } from '@/modules/students/students.service';
+import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
+import { Role } from '@/enums/role.enum';
+import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
+import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const md5 = require('md5');
@@ -17,7 +25,65 @@ const ffmpeg = require('fluent-ffmpeg');
 
 @Injectable()
 export class FilesService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly schoolUserService: SchoolUsersService,
+    private readonly studentService: StudentsService,
+    private readonly classesService: ClassesService,
+  ) {}
+
+  async readExcelFile(filename: string, filePath: string, user) {
+    const workbook = await new Excel.Workbook().xlsx.readFile(filePath);
+    const worksheets = workbook.worksheets;
+
+    for (const sheet of worksheets) {
+      const members = [];
+      const actualRows = sheet.actualRowCount - 4;
+      const rows = sheet.getRows(7, actualRows);
+
+      const newClass = await this.classesService.createNewClass(
+        sheet.name,
+        user.school.toString(),
+      );
+
+      for (const row of rows) {
+        const parentObj = {
+          fullName: row.values[6],
+          phoneNumber: row.values[7],
+          role: Role.Parents,
+          status: UserStatus.active,
+          password: row.values[7],
+        };
+
+        const studentObj = {
+          studentId: row.values[2].toString(),
+          fullName: row.values[3],
+          gender:
+            row.values[4].toLowerCase() == 'nam'
+              ? UserGender.male
+              : UserGender.female,
+          dateOfBirth: await dateToTimestamps(row.values[5].toString()),
+          status: UserStatus.active,
+          school: user.school,
+          role: Role.Student,
+          password: row.values[2].toString(),
+          class: newClass._id,
+        };
+
+        const newStudent = await this.studentService.createStudent(
+          studentObj,
+          parentObj,
+        );
+
+        members.push(newStudent._id);
+        await this.classesService.addMember(
+          sheet.name,
+          user.school.toString(),
+          members,
+        );
+      }
+    }
+  }
 
   async uploadFile(
     dataBuffer: Buffer,

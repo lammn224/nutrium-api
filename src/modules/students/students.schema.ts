@@ -2,15 +2,17 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, ObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
 import * as MongooseDelete from 'mongoose-delete';
 import { OverrideMethods } from '@/constants/override-method.constant';
 import { Role } from '@/enums/role.enum';
-import { UserStatus } from './enum/user-status.enum';
 import { School } from '@/modules/schools/schools.schema';
-import { Student } from '@/modules/students/students.schema';
+import { Classes } from '@/modules/classes/classes.schema';
+import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
+import { SchoolUser } from '@/modules/school-users/school-user.schema';
 
-export type SchoolUserDocument = SchoolUser & Document;
+export type StudentDocument = Student & Document;
 
 @Schema({
   timestamps: {
@@ -19,14 +21,15 @@ export type SchoolUserDocument = SchoolUser & Document;
     currentTime: () => Date.now(),
   },
 })
-export class SchoolUser {
+export class Student {
   @ApiProperty({ type: String, required: true })
   _id: string | ObjectId;
 
+  @IsNotEmpty()
   @IsString()
   @ApiProperty({ type: String, required: true })
   @Prop({ type: String, required: true, unique: true, index: true })
-  phoneNumber: string;
+  studentId: string;
 
   @IsNotEmpty()
   @IsString()
@@ -50,6 +53,19 @@ export class SchoolUser {
   })
   role: Role;
 
+  @IsNumber()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  dateOfBirth: number;
+
+  @ApiProperty({ enum: UserGender, default: UserGender.male })
+  @IsEnum(UserGender)
+  @Prop({ enum: UserGender, default: UserGender.male })
+  gender: UserGender;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: SchoolUser.name })
+  parents: string | SchoolUser;
+
   @IsEnum(UserStatus)
   @ApiProperty({ enum: UserStatus, default: UserStatus.active })
   @Prop({ enum: UserStatus, default: UserStatus.active })
@@ -62,8 +78,8 @@ export class SchoolUser {
 
   @IsString()
   @ApiProperty({ type: String })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Student' })
-  child: string | Student;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Classes.name })
+  class: string | Classes;
 
   @Prop({ type: Number })
   createdAt: number;
@@ -75,15 +91,15 @@ export class SchoolUser {
   deletedAt?: number;
 }
 
-export const SchoolUserSchema = SchemaFactory.createForClass(SchoolUser);
+export const StudentSchema = SchemaFactory.createForClass(Student);
 
-SchoolUserSchema.plugin(MongooseDelete, {
+StudentSchema.plugin(MongooseDelete, {
   deletedAt: { type: Number },
   deleted: true,
   overrideMethods: OverrideMethods,
 });
 
-SchoolUserSchema.pre('save', async function (next) {
+StudentSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
 
@@ -97,7 +113,7 @@ SchoolUserSchema.pre('save', async function (next) {
   return next();
 });
 
-SchoolUserSchema.set('toJSON', {
+StudentSchema.set('toJSON', {
   transform: function (doc, ret, opt) {
     delete ret['password'];
     delete ret['__v'];

@@ -23,6 +23,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ListenersModule } from './listeners/listeners.module';
 import { SchoolsModule } from './modules/schools/schools.module';
 import { FoodsModule } from './modules/foods/foods.module';
+import { FilesModule } from '@/modules/files/files.module';
+import { ClassesModule } from './modules/classes/classes.module';
+import { StudentsModule } from './modules/students/students.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -58,6 +61,9 @@ import { FoodsModule } from './modules/foods/foods.module';
     ListenersModule,
     SchoolsModule,
     FoodsModule,
+    FilesModule,
+    ClassesModule,
+    StudentsModule,
   ],
   controllers: [AppController],
   providers: [

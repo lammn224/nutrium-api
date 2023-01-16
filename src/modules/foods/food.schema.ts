@@ -28,30 +28,58 @@ export class Food {
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: Number, required: true })
   @Prop({ type: Number, required: true })
   power: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: Number, required: true })
   @Prop({ type: Number, required: true })
   protein: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: Number, required: true })
   @Prop({ type: Number, required: true })
   lipid: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: Number, required: true })
   @Prop({ type: Number, required: true })
   glucid: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  ca: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  fe: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  fiber: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @Type(() => Number)
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  zn: number;
 
   @Prop({ type: Number })
   createdAt: number;

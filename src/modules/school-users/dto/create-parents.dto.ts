@@ -1,8 +1,11 @@
 import { PickType } from '@nestjs/swagger';
 import { SchoolUser } from '../school-user.schema';
 
-export class CreateSchoolUserDto extends PickType(SchoolUser, [
+export class CreateParentsDto extends PickType(SchoolUser, [
   'fullName',
-  'phoneNumber',
   'password',
+  'phoneNumber',
+  'role',
+  'status',
+  'child',
 ] as const) {}
