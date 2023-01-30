@@ -122,7 +122,9 @@ export class SchoolUsersService {
   }
 
   async me(userId) {
-    const user = await this.schoolUserModel.findOne({ _id: userId });
+    const user = await this.schoolUserModel.findOne({ _id: userId }).populate({
+      path: 'school',
+    });
 
     return user;
   }

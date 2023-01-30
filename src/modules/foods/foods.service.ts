@@ -5,6 +5,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { Food, FoodDocument } from './food.schema';
+import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
+import { PaginationDto } from '@/dtos/pagination-response.dto';
+import { SortType } from '@/enums/sort.enum';
 
 @Injectable()
 export class FoodsService {
@@ -15,8 +18,37 @@ export class FoodsService {
     return newFood;
   }
 
-  async findAll() {
-    return await this.foodModel.find({});
+  async findAll(
+    paginationRequestFullDto: PaginationRequestFullDto,
+  ): Promise<PaginationDto<Food>> {
+    // return await this.foodModel.find({});
+
+    const filter = {
+      ...(paginationRequestFullDto.keyword && {
+        name: {
+          $regex: `.*${paginationRequestFullDto.keyword}.*`,
+          $options: 'i',
+        },
+      }),
+    };
+
+    const sortObj = {};
+    sortObj[paginationRequestFullDto.sortBy] =
+      paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.foodModel.countDocuments(filter);
+
+    const characters = await this.foodModel
+      .find(filter)
+      .select('-deleted -createdAt -updatedAt')
+      .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: characters,
+    };
   }
 
   async findOne(id: string) {

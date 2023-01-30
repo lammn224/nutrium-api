@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { Roles } from '@/decorators/roles.decorator';
@@ -12,6 +12,11 @@ import {
 } from '@nestjs/swagger';
 import { AuthApiError } from '@/decorators/api-error-response.decorator';
 import { Food } from './food.schema';
+import {
+  PaginationDto,
+  PaginationResponse,
+} from '@/dtos/pagination-response.dto';
+import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 
 @ApiTags('Foods')
 @ApiBearerAuth()
@@ -32,10 +37,13 @@ export class FoodsController {
   @Roles(Role.Admin)
   @AuthApiError()
   @ApiOperation({ summary: 'Get all foods' })
+  @PaginationResponse(Food)
   @ApiOkResponse({ type: Food })
   @Get()
-  async findAll() {
-    return await this.foodsService.findAll();
+  async findAll(
+    @Query() queries: PaginationRequestFullDto,
+  ): Promise<PaginationDto<Food>> {
+    return await this.foodsService.findAll(queries);
   }
 
   @Roles(Role.Admin)
