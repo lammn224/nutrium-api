@@ -50,6 +50,7 @@ export class FilesService {
         const parentObj = {
           fullName: row.values[6],
           phoneNumber: row.values[7],
+          school: user.school,
           role: Role.Parents,
           status: UserStatus.active,
           password: row.values[7],

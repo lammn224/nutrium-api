@@ -22,7 +22,17 @@ export class StudentsService {
   ) {}
 
   async me(userId) {
-    const user = await this.studentModel.findOne({ _id: userId });
+    const user = await this.studentModel
+      .findOne({ _id: userId })
+      .populate({
+        path: 'parents',
+      })
+      .populate({
+        path: 'school',
+      })
+      .populate({
+        path: 'class',
+      });
 
     return user;
   }
