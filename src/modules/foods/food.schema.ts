@@ -2,9 +2,10 @@ import { OverrideMethods } from '@/constants/override-method.constant';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Validate } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import * as MongooseDelete from 'mongoose-delete';
+import { ValidateNumeralString } from '@/modules/foods/validation/validate-numeral-string';
 
 export type FoodDocument = Food & Document;
 
@@ -25,61 +26,69 @@ export class Food {
   @Prop({ type: String, required: true })
   name: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  power: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  power: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  protein: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  protein: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  lipid: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  lipid: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  glucid: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  glucid: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  ca: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  ca: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  fe: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  fe: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  fiber: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  fiber: string;
 
+  @Validate(ValidateNumeralString)
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  zn: number;
+  @IsString()
+  @Type(() => String)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  zn: string;
 
   @Prop({ type: Number })
   createdAt: number;

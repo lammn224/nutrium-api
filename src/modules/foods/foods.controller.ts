@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { CreateFoodDto } from './dto/create-food.dto';
 import { Roles } from '@/decorators/roles.decorator';
@@ -17,6 +26,7 @@ import {
   PaginationResponse,
 } from '@/dtos/pagination-response.dto';
 import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
+import { UpdateFoodDto } from '@/modules/foods/dto/update-food.dto';
 
 @ApiTags('Foods')
 @ApiBearerAuth()
@@ -53,5 +63,26 @@ export class FoodsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.foodsService.findOne(id);
+  }
+
+  @Roles(Role.Admin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Update one food' })
+  @ApiOkResponse({ type: Food })
+  @Patch(':id')
+  async updateOne(
+    @Param('id') id: string,
+    @Body() updateFoodDto: UpdateFoodDto,
+  ) {
+    return await this.foodsService.update(id, updateFoodDto);
+  }
+
+  @Roles(Role.Admin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Delete one food' })
+  @ApiOkResponse({ type: Food })
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return await this.foodsService.delete(id);
   }
 }

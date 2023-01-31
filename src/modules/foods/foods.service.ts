@@ -8,6 +8,7 @@ import { Food, FoodDocument } from './food.schema';
 import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 import { PaginationDto } from '@/dtos/pagination-response.dto';
 import { SortType } from '@/enums/sort.enum';
+import { UpdateFoodDto } from '@/modules/foods/dto/update-food.dto';
 
 @Injectable()
 export class FoodsService {
@@ -21,8 +22,6 @@ export class FoodsService {
   async findAll(
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<Food>> {
-    // return await this.foodModel.find({});
-
     const filter = {
       ...(paginationRequestFullDto.keyword && {
         name: {
@@ -59,5 +58,31 @@ export class FoodsService {
     }
 
     return food;
+  }
+
+  async update(id: string, updateFoodDto: UpdateFoodDto) {
+    const food = await this.foodModel.findById(id);
+
+    if (!food) {
+      throwNotFound(FOOD_NOT_EXIST);
+    }
+
+    for (const key in updateFoodDto) {
+      food[key] = updateFoodDto[key];
+    }
+
+    await food.save();
+
+    return food;
+  }
+
+  async delete(id: string) {
+    const food = await this.foodModel.findById(id);
+
+    if (!food) {
+      throwNotFound(FOOD_NOT_EXIST);
+    }
+
+    await food.delete();
   }
 }
