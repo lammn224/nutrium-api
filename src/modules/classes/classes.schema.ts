@@ -9,6 +9,7 @@ import {
 import { School } from '@/modules/schools/schools.schema';
 import * as MongooseDelete from 'mongoose-delete';
 import { OverrideMethods } from '@/constants/override-method.constant';
+import { Student } from '@/modules/students/students.schema';
 
 export type ClassesDocument = Classes & Document;
 @Schema({
@@ -29,7 +30,8 @@ export class Classes {
   name: string;
 
   @IsArray()
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: School.name })
+  @ApiProperty({ type: [String] })
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Student' })
   members: SchoolUser[];
 
   @IsString()

@@ -28,6 +28,14 @@ export class ClassesService {
     return await this.classesModel.create({ name, school, members });
   }
 
+  async findClassById(id: string) {
+    const classObj = await this.classesModel.findById(id).populate({
+      path: 'members',
+    });
+
+    return classObj;
+  }
+
   async findAll(
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<Classes>> {
