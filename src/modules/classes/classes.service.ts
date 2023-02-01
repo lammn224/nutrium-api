@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Classes, ClassesDocument } from '@/modules/classes/classes.schema';
 import { Model } from 'mongoose';
+import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
+import { PaginationDto } from '@/dtos/pagination-response.dto';
+import { SortType } from '@/enums/sort.enum';
 
 @Injectable()
 export class ClassesService {
@@ -23,5 +26,36 @@ export class ClassesService {
       return isExistedClass;
     }
     return await this.classesModel.create({ name, school, members });
+  }
+
+  async findAll(
+    paginationRequestFullDto: PaginationRequestFullDto,
+  ): Promise<PaginationDto<Classes>> {
+    const filter = {
+      ...(paginationRequestFullDto.keyword && {
+        name: {
+          $regex: `.*${paginationRequestFullDto.keyword}.*`,
+          $options: 'i',
+        },
+      }),
+    };
+
+    const sortObj = {};
+    sortObj[paginationRequestFullDto.sortBy] =
+      paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.classesModel.countDocuments(filter);
+
+    const classes = await this.classesModel
+      .find(filter)
+      .select('-deleted -createdAt -updatedAt')
+      .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: classes,
+    };
   }
 }
