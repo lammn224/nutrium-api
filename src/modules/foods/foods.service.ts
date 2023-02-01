@@ -37,7 +37,7 @@ export class FoodsService {
 
     const total = await this.foodModel.countDocuments(filter);
 
-    const characters = await this.foodModel
+    const foods = await this.foodModel
       .find(filter)
       .select('-deleted -createdAt -updatedAt')
       .sort(sortObj)
@@ -46,7 +46,7 @@ export class FoodsService {
 
     return {
       total,
-      results: characters,
+      results: foods,
     };
   }
 
