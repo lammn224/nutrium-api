@@ -51,14 +51,14 @@ export class FilesController {
     }
     const filePath = getXLSXFile(file.originalname);
 
-    await this.filesService.readExcelFile(
+    const result = await this.filesService.readExcelFile(
       file.originalname,
       filePath,
       req.user,
     );
 
     await unlinkAsync(filePath);
-    // return result;
+    return result;
   }
 
   @AuthApiError()

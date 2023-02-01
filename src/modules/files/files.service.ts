@@ -84,6 +84,9 @@ export class FilesService {
         );
       }
     }
+    return {
+      Location: 'done',
+    };
   }
 
   async uploadFile(
