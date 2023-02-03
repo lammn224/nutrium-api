@@ -13,6 +13,7 @@ import { throwNotFound } from '@/utils/exception.utils';
 import { CreateSchoolUserDto } from './dto/create-school-user.dto';
 import { Role } from '@/enums/role.enum';
 import { CreateParentsDto } from '@/modules/school-users/dto/create-parents.dto';
+import { UpdateUserInfoDto } from '@/modules/school-users/dto/update-user-info-dto';
 
 @Injectable()
 export class SchoolUsersService {
@@ -133,5 +134,23 @@ export class SchoolUsersService {
       });
 
     return user;
+  }
+
+  async updateInfo(schoolUserId, updateUserInfoDto: UpdateUserInfoDto) {
+    const schoolUser = await this.schoolUserModel.findOne({
+      _id: schoolUserId,
+    });
+
+    if (!schoolUser) {
+      throwNotFound(USER_NOT_EXIST);
+    }
+
+    for (const key in updateUserInfoDto) {
+      schoolUser[key] = updateUserInfoDto[key];
+    }
+
+    await schoolUser.save();
+
+    return schoolUser;
   }
 }

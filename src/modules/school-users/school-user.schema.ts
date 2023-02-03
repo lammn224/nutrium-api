@@ -25,7 +25,7 @@ export class SchoolUser {
 
   @IsString()
   @ApiProperty({ type: String, required: true })
-  @Prop({ type: String, required: true, unique: true, index: true })
+  @Prop({ type: String, required: true, index: true })
   phoneNumber: string;
 
   @IsNotEmpty()

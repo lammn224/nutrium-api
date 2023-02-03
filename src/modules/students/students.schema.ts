@@ -11,6 +11,7 @@ import { School } from '@/modules/schools/schools.schema';
 import { Classes } from '@/modules/classes/classes.schema';
 import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import { SchoolUser } from '@/modules/school-users/school-user.schema';
+import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
 
 export type StudentDocument = Student & Document;
 
@@ -108,6 +109,14 @@ StudentSchema.pre('save', async function (next) {
 
     // @ts-ignore
     user.password = await bcrypt.hash(user.password, salt);
+  }
+
+  if (this.isModified('dateOfBirth') || this.isNew) {
+    // @ts-ignore
+    if (typeof user.dateOfBirth === 'string') {
+      // @ts-ignore
+      user.dateOfBirth = await dateToTimestamps(user.dateOfBirth);
+    }
   }
 
   return next();

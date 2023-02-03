@@ -1,12 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
-  Query,
+  Controller,
   Delete,
+  Get,
+  Param,
   Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { CreateFoodDto } from './dto/create-food.dto';
@@ -44,7 +44,7 @@ export class FoodsController {
   }
 
   // filter with query
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Parents, Role.Student)
   @AuthApiError()
   @ApiOperation({ summary: 'Get all foods' })
   @PaginationResponse(Food)

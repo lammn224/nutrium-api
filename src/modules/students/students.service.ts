@@ -12,6 +12,7 @@ import { Student, StudentDocument } from '@/modules/students/students.schema';
 import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import * as bcrypt from 'bcrypt';
 import { SchoolUsersService } from '@/modules/school-users/school-users.service';
+import { UpdateStudentInfoDto } from '@/modules/students/dto/update-student-info-dto';
 
 @Injectable()
 export class StudentsService {
@@ -111,5 +112,23 @@ export class StudentsService {
 
   async comparePassword(plainPass: string, password: string): Promise<boolean> {
     return await bcrypt.compare(plainPass, password);
+  }
+
+  async updateInfo(studentId, updateStudentInfoDto: UpdateStudentInfoDto) {
+    const student = await this.studentModel.findOne({
+      _id: studentId,
+    });
+
+    if (!student) {
+      throwNotFound(USER_NOT_EXIST);
+    }
+
+    for (const key in updateStudentInfoDto) {
+      student[key] = updateStudentInfoDto[key];
+    }
+
+    await student.save();
+
+    return student;
   }
 }
