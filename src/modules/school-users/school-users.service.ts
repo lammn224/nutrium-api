@@ -23,10 +23,10 @@ export class SchoolUsersService {
   ) {}
 
   async createParents(createParentsDto: CreateParentsDto) {
-    const isExistedParents = await this.schoolUserModel.findOne({
-      phoneNumber: createParentsDto.phoneNumber,
-    });
-    if (isExistedParents) return isExistedParents;
+    // const isExistedParents = await this.schoolUserModel.findOne({
+    //   phoneNumber: createParentsDto.phoneNumber,
+    // });
+    // if (isExistedParents) return isExistedParents;
 
     const newParents = await this.schoolUserModel.create({
       ...createParentsDto,
