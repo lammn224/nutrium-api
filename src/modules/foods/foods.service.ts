@@ -19,7 +19,7 @@ export class FoodsService {
     return newFood;
   }
 
-  async findAll(
+  async findAllWithFilter(
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<Food>> {
     const filter = {
@@ -43,6 +43,19 @@ export class FoodsService {
       .sort(sortObj)
       .skip(paginationRequestFullDto.offset)
       .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: foods,
+    };
+  }
+
+  async findAll(): Promise<PaginationDto<Food>> {
+    const total = await this.foodModel.countDocuments({});
+
+    const foods = await this.foodModel
+      .find({})
+      .select('-deleted -createdAt -updatedAt');
 
     return {
       total,

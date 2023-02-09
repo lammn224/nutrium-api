@@ -28,18 +28,23 @@ export class ClassesService {
     return await this.classesModel.create({ name, school, members });
   }
 
-  async findClassById(id: string) {
-    const classObj = await this.classesModel.findById(id).populate({
-      path: 'members',
-    });
+  async findClassById(user, id: string) {
+    console.log(user);
+    const classObj = await this.classesModel
+      .findOne({ _id: id, school: user.school })
+      .populate({
+        path: 'members',
+      });
 
     return classObj;
   }
 
   async findAll(
+    user,
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<Classes>> {
     const filter = {
+      school: user.school,
       ...(paginationRequestFullDto.keyword && {
         name: {
           $regex: `.*${paginationRequestFullDto.keyword}.*`,

@@ -46,14 +46,24 @@ export class FoodsController {
   // filter with query
   @Roles(Role.Admin, Role.Parents, Role.Student)
   @AuthApiError()
-  @ApiOperation({ summary: 'Get all foods' })
+  @ApiOperation({ summary: 'Get all foods with paging' })
   @PaginationResponse(Food)
   @ApiOkResponse({ type: Food })
   @Get()
-  async findAll(
+  async findAllWithFilter(
     @Query() queries: PaginationRequestFullDto,
   ): Promise<PaginationDto<Food>> {
-    return await this.foodsService.findAll(queries);
+    return await this.foodsService.findAllWithFilter(queries);
+  }
+
+  @Roles(Role.Admin, Role.Parents, Role.Student)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Get all foods' })
+  @PaginationResponse(Food)
+  @ApiOkResponse({ type: Food })
+  @Get('all')
+  async findAll(): Promise<PaginationDto<Food>> {
+    return await this.foodsService.findAll();
   }
 
   @Roles(Role.Admin)

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { ClassesService } from './classes.service';
 import {
   ApiBearerAuth,
@@ -33,8 +33,9 @@ export class ClassesController {
   @Get()
   async findAll(
     @Query() queries: PaginationRequestFullDto,
+    @Req() req,
   ): Promise<PaginationDto<Classes>> {
-    return await this.classesService.findAll(queries);
+    return await this.classesService.findAll(req.user, queries);
   }
 
   @Roles(Role.Admin)
@@ -42,7 +43,10 @@ export class ClassesController {
   @ApiOperation({ summary: 'Get one class' })
   @ApiOkResponse({ type: Classes })
   @Get(':id')
-  async findClassById(@Param() idRequestDto: IdRequestDto): Promise<Classes> {
-    return await this.classesService.findClassById(idRequestDto.id);
+  async findClassById(
+    @Param() idRequestDto: IdRequestDto,
+    @Req() req,
+  ): Promise<Classes> {
+    return await this.classesService.findClassById(req.user, idRequestDto.id);
   }
 }
