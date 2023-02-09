@@ -29,7 +29,6 @@ export class ClassesService {
   }
 
   async findClassById(user, id: string) {
-    console.log(user);
     const classObj = await this.classesModel
       .findOne({ _id: id, school: user.school })
       .populate({

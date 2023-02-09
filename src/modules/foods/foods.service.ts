@@ -50,17 +50,12 @@ export class FoodsService {
     };
   }
 
-  async findAll(): Promise<PaginationDto<Food>> {
-    const total = await this.foodModel.countDocuments({});
-
+  async findAll(): Promise<Food[]> {
     const foods = await this.foodModel
       .find({})
       .select('-deleted -createdAt -updatedAt');
 
-    return {
-      total,
-      results: foods,
-    };
+    return foods;
   }
 
   async findOne(id: string) {

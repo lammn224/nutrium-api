@@ -59,10 +59,9 @@ export class FoodsController {
   @Roles(Role.Admin, Role.Parents, Role.Student)
   @AuthApiError()
   @ApiOperation({ summary: 'Get all foods' })
-  @PaginationResponse(Food)
-  @ApiOkResponse({ type: Food })
+  @ApiOkResponse({ type: [Food] })
   @Get('all')
-  async findAll(): Promise<PaginationDto<Food>> {
+  async findAll(): Promise<Food[]> {
     return await this.foodsService.findAll();
   }
 
