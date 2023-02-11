@@ -1,16 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Meals, MealsDocument } from '@/modules/meals/meals.schema';
 import { Role } from '@/enums/role.enum';
-import { throwBadRequest } from '@/utils/exception.utils';
-import { MEAL_EXISTED } from '@/constants/error-codes.constant';
+import { throwBadRequest, throwForbidden } from '@/utils/exception.utils';
 import {
-  convertTimeStampsToString,
-  dateToTimestamps,
-} from '@/utils/dateToTimestamps.utils';
-import { Food } from '@/modules/foods/food.schema';
+  MEAL_EXISTED,
+  MEAL_NOT_EXISTED,
+  MEAL_NOT_UPDATED,
+} from '@/constants/error-codes.constant';
+import { UpdateMealDto } from '@/modules/meals/dto/update-meal.dto';
 
 @Injectable()
 export class MealsService {
@@ -24,10 +24,9 @@ export class MealsService {
     }
 
     const isExistMeal = await this.mealModel.findOne({
+      school: user.school,
       type: createMealDto.type,
-      date: await dateToTimestamps(
-        convertTimeStampsToString(createMealDto.date),
-      ),
+      date: createMealDto.date,
       createdBy: user._id,
     });
 
@@ -43,11 +42,55 @@ export class MealsService {
     return newMeal;
   }
 
-  async findAll(): Promise<Meals[]> {
-    const meals = await this.mealModel
-      .find({})
-      .select('-deleted -createdAt -updatedAt');
+  async updateMeal(id: string, updateMealDto: UpdateMealDto, user) {
+    const meal = await this.mealModel.findById(id);
 
-    return meals;
+    if (!meal) {
+      throwBadRequest(MEAL_NOT_EXISTED);
+    }
+
+    if (meal.createdBy.toString() !== user._id.toString()) {
+      throwForbidden(MEAL_NOT_UPDATED);
+    }
+
+    for (const key in updateMealDto) {
+      meal[key] = updateMealDto[key];
+    }
+
+    await meal.save();
+
+    return meal;
+  }
+
+  async findAll(user): Promise<Meals[]> {
+    if (user.role === Role.Admin) {
+      const meals = await this.mealModel.find({
+        school: user.school,
+      });
+
+      return meals;
+    } else if (user.role === Role.Parents) {
+      const mealsByUser = await this.mealModel
+        .find({ school: user.school, createdBy: user._id })
+        .select('-deleted -createdAt -updatedAt');
+
+      const mealsByAdmin = await this.mealModel.find({
+        school: user.school,
+        createdBy: { $ne: user._id },
+      });
+
+      return [...mealsByAdmin, ...mealsByUser];
+    } else {
+      const mealsByParent = await this.mealModel
+        .find({ school: user.school, createdBy: user.parents })
+        .select('-deleted -createdAt -updatedAt');
+
+      const mealsByAdmin = await this.mealModel.find({
+        school: user.school,
+        createdBy: { $ne: user.parents },
+      });
+
+      return [...mealsByAdmin, ...mealsByParent];
+    }
   }
 }

@@ -70,8 +70,6 @@ export class Meals {
 
   @IsNotEmpty()
   @IsNumber()
-  @Type(() => Number)
-  @Prop({ type: Number })
   @ApiProperty({ type: Number, required: true })
   @Prop({ type: Number, required: true })
   date: number;
@@ -127,7 +125,6 @@ MealsSchema.pre('save', async function (next) {
 
 MealsSchema.set('toJSON', {
   transform: function (doc, ret, opt) {
-    ret['date'] = new Date(doc.date * 1000);
     delete ret['__v'];
     return ret;
   },
@@ -135,7 +132,6 @@ MealsSchema.set('toJSON', {
 
 MealsSchema.set('toObject', {
   transform: function (doc, ret, opt) {
-    ret['date'] = new Date(doc.date * 1000);
     delete ret['__v'];
     return ret;
   },

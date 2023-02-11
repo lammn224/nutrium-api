@@ -22,6 +22,8 @@ export const FOOD_NOT_EXIST = 'FOOD_NOT_EXIST';
 export const UPLOAD_FAILED = 'UPLOAD_FAILED';
 
 export const MEAL_EXISTED = 'MEAL_EXISTED';
+export const MEAL_NOT_EXISTED = 'MEAL_NOT_EXISTED';
+export const MEAL_NOT_UPDATED = 'MEAL_NOT_UPDATED';
 
 export const ERROR_CODES = new Map<string, string>([
   [DATA_REFERENCE, 'Data reference'],
@@ -46,4 +48,6 @@ export const ERROR_CODES = new Map<string, string>([
   [UPLOAD_FAILED, 'Upload fail, please check data again'],
 
   [MEAL_EXISTED, 'Meal is already existed in day'],
+  [MEAL_NOT_EXISTED, 'Meal is not existed'],
+  [MEAL_NOT_UPDATED, 'Cannot update this meal'],
 ]);
