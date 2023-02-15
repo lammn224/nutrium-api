@@ -19,3 +19,14 @@ export function convertTimeStampsToString(ts) {
 function padTo2Digits(num) {
   return num.toString().padStart(2, '0');
 }
+
+export function startOfWeek(date) {
+  const diff = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1);
+
+  return new Date(date.setDate(diff));
+}
+
+export function endOfWeek(date) {
+  const lastday = date.getDate() - (date.getDay() - 1) + 6;
+  return new Date(date.setDate(lastday));
+}

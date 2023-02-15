@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthApiError } from '@/decorators/api-error-response.decorator';
 import {
@@ -9,9 +9,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PaginationDto } from '@/dtos/pagination-response.dto';
-import { SchoolUser } from '@/modules/school-users/school-user.schema';
 import { UpdateStudentInfoDto } from '@/modules/students/dto/update-student-info-dto';
 import { Student } from '@/modules/students/students.schema';
+import { IdRequestDto } from '@/dtos/id-request.dto';
 
 @ApiExtraModels(PaginationDto)
 @ApiBearerAuth()
@@ -39,5 +39,13 @@ export class StudentsController {
       req.user._id,
       updateStudentInfoDto,
     );
+  }
+
+  @AuthApiError()
+  @ApiOperation({ summary: 'Get details student' })
+  @ApiResponse({ type: Student })
+  @Get(':id')
+  async getDetailsStudentById(@Param() idRequestDto: IdRequestDto) {
+    return await this.studentsService.getDetailsStudentById(idRequestDto.id);
   }
 }

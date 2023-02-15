@@ -48,6 +48,26 @@ export class StudentsService {
     return student;
   }
 
+  async getDetailsStudentById(id: string): Promise<Student> {
+    const student = await this.studentModel
+      .findById(id)
+      .populate({
+        path: 'parents',
+      })
+      .populate({
+        path: 'school',
+      })
+      .populate({
+        path: 'class',
+      });
+
+    if (!student) {
+      throwNotFound(USER_NOT_EXIST);
+    }
+
+    return student;
+  }
+
   async createStudent(studentObj, parentObj) {
     const isExistedStudent = await this.studentModel.findOne({
       studentId: studentObj.studentId,
