@@ -64,6 +64,15 @@ export class Student {
   @Prop({ enum: UserGender, default: UserGender.male })
   gender: UserGender;
 
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  weight: number;
+
+  @IsNumber()
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  height: number;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: SchoolUser.name })
   parents: string | SchoolUser;
 
