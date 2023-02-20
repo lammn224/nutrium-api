@@ -12,6 +12,7 @@ import { Classes } from '@/modules/classes/classes.schema';
 import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import { SchoolUser } from '@/modules/school-users/school-user.schema';
 import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
+import { ActivityType } from '@/modules/students/enum/activity-type.enum';
 
 export type StudentDocument = Student & Document;
 
@@ -72,6 +73,15 @@ export class Student {
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })
   height: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  rcmCalories: number;
+
+  @IsEnum(ActivityType)
+  @ApiProperty({ enum: ActivityType, default: ActivityType.LIGHT })
+  @Prop({ enum: ActivityType, default: ActivityType.LIGHT })
+  activityType: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: SchoolUser.name })
   parents: string | SchoolUser;

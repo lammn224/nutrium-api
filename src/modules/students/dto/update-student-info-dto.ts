@@ -1,13 +1,18 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Student } from '@/modules/students/students.schema';
 import { Type } from 'class-transformer';
+import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
+import { Prop } from '@nestjs/mongoose';
+import { ActivityType } from '@/modules/students/enum/activity-type.enum';
 
 export class UpdateStudentInfoDto extends PickType(Student, [
   'fullName',
   'dateOfBirth',
   'weight',
   'height',
+  'rcmCalories',
+  'gender',
 ] as const) {
   @IsOptional()
   @IsNumber()
@@ -30,4 +35,20 @@ export class UpdateStudentInfoDto extends PickType(Student, [
   @IsNumber()
   @ApiProperty({ type: Number })
   height: number;
+
+  @IsOptional()
+  @IsEnum(UserGender)
+  @ApiProperty({ enum: UserGender, default: UserGender.male })
+  gender: UserGender;
+
+  @IsOptional()
+  @IsEnum(ActivityType)
+  @ApiProperty({ enum: ActivityType, default: ActivityType.LIGHT })
+  activityType: ActivityType;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @ApiProperty({ type: Number })
+  rcmCalories: number;
 }
