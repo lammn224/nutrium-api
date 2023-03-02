@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -7,6 +7,8 @@ import { Role } from '@/enums/role.enum';
 import { throwBadRequest, throwForbidden } from '@/utils/exception.utils';
 import {
   MEAL_EXISTED,
+  MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES,
+  MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES,
   MEAL_NOT_EXISTED,
   MEAL_NOT_UPDATED,
 } from '@/constants/error-codes.constant';
@@ -41,6 +43,20 @@ export class MealsService {
 
     if (isExistMeal) {
       throwBadRequest(MEAL_EXISTED);
+    }
+
+    if (user.child) {
+      const student = await this.studentService.findById(user.child);
+
+      if (createMealDto.type === MealType.Breakfast) {
+        if (createMealDto.power > student.maxBreakfastCalories) {
+          throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
+        }
+      } else {
+        if (createMealDto.power > student.maxDinnerCalories) {
+          throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
+        }
+      }
     }
 
     const newMeal = await this.mealModel.create(createMealDto);

@@ -144,6 +144,14 @@ export class StudentsService {
     }
 
     for (const key in updateStudentInfoDto) {
+      if (key === 'rcmCalories') {
+        student['maxBreakfastCalories'] =
+          Math.round((updateStudentInfoDto.rcmCalories * 0.45 + 1.5) * 100) /
+          100;
+        student['maxDinnerCalories'] =
+          Math.round((updateStudentInfoDto.rcmCalories * 0.2 + 1.5) * 100) /
+          100;
+      }
       student[key] = updateStudentInfoDto[key];
     }
 

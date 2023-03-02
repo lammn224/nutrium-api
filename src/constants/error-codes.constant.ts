@@ -24,6 +24,10 @@ export const UPLOAD_FAILED = 'UPLOAD_FAILED';
 export const MEAL_EXISTED = 'MEAL_EXISTED';
 export const MEAL_NOT_EXISTED = 'MEAL_NOT_EXISTED';
 export const MEAL_NOT_UPDATED = 'MEAL_NOT_UPDATED';
+export const MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES =
+  'MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES';
+export const MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES =
+  'MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES';
 
 export const ERROR_CODES = new Map<string, string>([
   [DATA_REFERENCE, 'Data reference'],
@@ -50,4 +54,12 @@ export const ERROR_CODES = new Map<string, string>([
   [MEAL_EXISTED, 'Meal is already existed in day'],
   [MEAL_NOT_EXISTED, 'Meal is not existed'],
   [MEAL_NOT_UPDATED, 'Cannot update this meal'],
+  [
+    MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES,
+    'Meal has overcome breakfast calories limit',
+  ],
+  [
+    MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES,
+    'Meal has overcome dinner calories limit',
+  ],
 ]);

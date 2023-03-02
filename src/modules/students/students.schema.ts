@@ -78,6 +78,14 @@ export class Student {
   @Prop({ type: Number, default: 0 })
   rcmCalories: number;
 
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  maxBreakfastCalories: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  maxDinnerCalories: number;
+
   @IsEnum(ActivityType)
   @ApiProperty({ enum: ActivityType, default: ActivityType.LIGHT })
   @Prop({ enum: ActivityType, default: ActivityType.LIGHT })
