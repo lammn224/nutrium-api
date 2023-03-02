@@ -24,6 +24,7 @@ import { Meals } from '@/modules/meals/meals.schema';
 import { IdRequestDto } from '@/dtos/id-request.dto';
 import { UpdateMealDto } from '@/modules/meals/dto/update-meal.dto';
 import { TimestampDto } from '@/modules/meals/dto/timestamp.dto';
+import { MealPerStudentDto } from '@/modules/meals/dto/meal-per-student.dto';
 
 @ApiTags('Meals')
 @ApiBearerAuth()
@@ -68,14 +69,26 @@ export class MealsController {
 
   @Roles(Role.Admin, Role.Parents, Role.Student)
   @AuthApiError()
+  @ApiOperation({ summary: 'Get meals by week per student' })
+  // @ApiOkResponse({ type: [Meals] })
+  @Get('by-week-per-student')
+  async getMealsByWeekPerStudent(
+    @Query() mealPerStudentDto: MealPerStudentDto,
+    @Req() req,
+  ) {
+    return await this.mealsService.getMealsByWeekPerStudent(
+      mealPerStudentDto.ts,
+      mealPerStudentDto.studentId,
+      req.user,
+    );
+  }
+
+  @Roles(Role.Admin, Role.Parents, Role.Student)
+  @AuthApiError()
   @ApiOperation({ summary: 'Get meals by week' })
   // @ApiOkResponse({ type: [Meals] })
   @Get('by-week')
   async getMealsByWeek(@Query() timestampDto: TimestampDto, @Req() req) {
-    return await this.mealsService.getMealsByWeek(
-      timestampDto.ts,
-      timestampDto.studentId,
-      req.user,
-    );
+    return await this.mealsService.getMealsByWeek(timestampDto.ts, req.user);
   }
 }
