@@ -68,9 +68,10 @@ export class StudentsService {
     return student;
   }
 
-  async createStudent(studentObj, parentObj) {
+  async createStudent(studentObj, parentObj, school) {
     const isExistedStudent = await this.studentModel.findOne({
       studentId: studentObj.studentId,
+      school,
     });
     if (isExistedStudent) throwBadRequest(UPLOAD_FAILED);
 

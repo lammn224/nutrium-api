@@ -16,6 +16,9 @@ export const USERNAME_ALREADY_EXIST = 'USERNAME_ALREADY_EXIST';
 
 export const SCHOOL_NOT_EXIST = 'SCHOOL_NOT_EXIST';
 
+export const GRADE_EXISTED = 'GRADE_EXISTED';
+export const GRADE_NOT_EXISTED = 'GRADE_NOT_EXISTED';
+
 //FOOD
 export const FOOD_NOT_EXIST = 'FOOD_NOT_EXIST';
 
@@ -62,4 +65,6 @@ export const ERROR_CODES = new Map<string, string>([
     MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES,
     'Meal has overcome dinner calories limit',
   ],
+  [GRADE_EXISTED, 'Grade is already existed'],
+  [GRADE_NOT_EXISTED, 'Grade is not existed'],
 ]);

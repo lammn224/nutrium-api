@@ -16,10 +16,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { getXLSXFile, xlsxFileFilter, xlsxFileName } from '@/utils/xlsx.utils';
 import * as fs from 'fs';
-
 import { promisify } from 'util';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/enums/role.enum';
+import { FileExtender } from '@/modules/files/file-extender';
 
 const unlinkAsync = promisify(fs.unlink);
 @ApiBearerAuth()
@@ -32,6 +32,7 @@ export class FilesController {
   @AuthApiError()
   @ApiOperation({ summary: 'Upload excel file to create one or multi classes' })
   @ApiFile('file', UploadTypesEnum.DOCS)
+  @UseInterceptors(FileExtender)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -53,6 +54,8 @@ export class FilesController {
 
     const result = await this.filesService.readExcelFile(
       file.originalname,
+      // @ts-ignore
+      file.grade,
       filePath,
       req.user,
     );

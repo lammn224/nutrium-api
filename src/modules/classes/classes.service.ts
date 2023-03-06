@@ -11,10 +11,14 @@ export class ClassesService {
   constructor(
     @InjectModel(Classes.name) private classesModel: Model<ClassesDocument>,
   ) {}
-  async createNewClass(name: string, school: string): Promise<Classes> {
+  async createNewClass(
+    name: string,
+    school: string,
+    grade: string,
+  ): Promise<Classes> {
     const isExistedClass = await this.classesModel.findOne({ name, school });
     if (isExistedClass) return isExistedClass;
-    return await this.classesModel.create({ name, school });
+    return await this.classesModel.create({ name, school, grade });
   }
 
   async addMember(name: string, school: string, members: any[]) {

@@ -27,6 +27,7 @@ import { FilesModule } from '@/modules/files/files.module';
 import { ClassesModule } from './modules/classes/classes.module';
 import { StudentsModule } from './modules/students/students.module';
 import { MealsModule } from './modules/meals/meals.module';
+import { GradeModule } from '@/modules/grade/grade.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -66,6 +67,7 @@ import { MealsModule } from './modules/meals/meals.module';
     ClassesModule,
     StudentsModule,
     MealsModule,
+    GradeModule,
   ],
   controllers: [AppController],
   providers: [

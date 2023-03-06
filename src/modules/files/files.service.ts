@@ -32,7 +32,7 @@ export class FilesService {
     private readonly classesService: ClassesService,
   ) {}
 
-  async readExcelFile(filename: string, filePath: string, user) {
+  async readExcelFile(filename: string, grade: string, filePath: string, user) {
     const workbook = await new Excel.Workbook().xlsx.readFile(filePath);
     const worksheets = workbook.worksheets;
 
@@ -44,6 +44,7 @@ export class FilesService {
       const newClass = await this.classesService.createNewClass(
         sheet.name,
         user.school.toString(),
+        grade,
       );
 
       for (const row of rows) {
@@ -74,6 +75,7 @@ export class FilesService {
         const newStudent = await this.studentService.createStudent(
           studentObj,
           parentObj,
+          user.school.toString(),
         );
 
         members.push(newStudent._id);
