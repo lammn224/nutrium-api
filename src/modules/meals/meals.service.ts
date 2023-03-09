@@ -78,6 +78,20 @@ export class MealsService {
       throwForbidden(MEAL_NOT_UPDATED);
     }
 
+    if (user.child) {
+      const student = await this.studentService.findById(user.child);
+
+      if (updateMealDto.type === MealType.Breakfast) {
+        if (updateMealDto.power > student.maxBreakfastCalories) {
+          throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
+        }
+      } else {
+        if (updateMealDto.power > student.maxDinnerCalories) {
+          throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
+        }
+      }
+    }
+
     for (const key in updateMealDto) {
       meal[key] = updateMealDto[key];
     }
