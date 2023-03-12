@@ -13,6 +13,9 @@ import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import * as bcrypt from 'bcrypt';
 import { SchoolUsersService } from '@/modules/school-users/school-users.service';
 import { UpdateStudentInfoDto } from '@/modules/students/dto/update-student-info-dto';
+import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
+import { GradeService } from '@/modules/grade/grade.service';
+import { ClassesService } from '@/modules/classes/classes.service';
 
 @Injectable()
 export class StudentsService {
@@ -20,6 +23,8 @@ export class StudentsService {
     @InjectModel(Student.name)
     private studentModel: Model<StudentDocument>,
     private readonly schoolUserService: SchoolUsersService,
+    private readonly gradeService: GradeService,
+    private readonly classesService: ClassesService,
   ) {}
 
   async me(userId) {
@@ -159,5 +164,101 @@ export class StudentsService {
     await student.save();
 
     return student;
+  }
+
+  async calcOverallWeightAndHeightByGrade(user) {
+    const res = [];
+    //get all grades
+    const grades = await this.gradeService.findAll(user.school);
+
+    //get all class each grades
+    for (let i = 0; i < grades.length; i++) {
+      const classObj = await this.classesService.findAllClassesByGrade(
+        grades[i]._id,
+      );
+      let sumWeight = 0;
+      let sumHeight = 0;
+      let totalMembers = 0;
+      for (let j = 0; j < classObj.length; j++) {
+        classObj[j].members.forEach((student) => {
+          // @ts-ignore
+          sumWeight += student.weight;
+          // @ts-ignore
+          sumHeight += student.height;
+        });
+        totalMembers += classObj[j].members.length;
+      }
+
+      res.push({
+        grade: grades[i].name,
+        avgWeight: sumWeight / totalMembers ? sumWeight / totalMembers : 0,
+        avgHeight: sumHeight / totalMembers ? sumHeight / totalMembers : 0,
+      });
+    }
+
+    return res;
+  }
+
+  async calcOverallWeightAndHeightByClass(user, gradeId) {
+    const res = [];
+    const grade = await this.gradeService.findGradeById(user, gradeId);
+
+    const classObj = await this.classesService.findAllClassesByGrade(grade._id);
+
+    for (let i = 0; i < classObj.length; i++) {
+      let sumWeight = 0;
+      let sumHeight = 0;
+      const totalMembers = classObj[i].members.length;
+      classObj[i].members.forEach((student) => {
+        // @ts-ignore
+        sumWeight += student.weight;
+        // @ts-ignore
+        sumHeight += student.height;
+      });
+
+      res.push({
+        class: classObj[i].name,
+        avgWeight: sumWeight / totalMembers ? sumWeight / totalMembers : 0,
+        avgHeight: sumHeight / totalMembers ? sumHeight / totalMembers : 0,
+      });
+    }
+
+    return res;
+  }
+  generateRandom(min = 0, max = 100) {
+    // find diff
+    const difference = max - min;
+
+    // generate random number
+    let rand = Math.random();
+
+    // multiply with difference
+    rand = Math.floor(rand * difference);
+
+    // add with min value
+    rand = rand + min;
+
+    return rand;
+  }
+
+  async randomData() {
+    const array = ['none', 'light', 'moderate', 'heavy'];
+    const students = await this.studentModel.find({});
+
+    students.forEach((student) => {
+      if (student.gender === UserGender.male) {
+        student.activityType = array[Math.floor(Math.random() * array.length)];
+        student.height = this.generateRandom(170, 185);
+        student.weight = this.generateRandom(58, 70);
+        student.save();
+      } else {
+        student.activityType = array[Math.floor(Math.random() * array.length)];
+        student.height = this.generateRandom(155, 165);
+        student.weight = this.generateRandom(42, 55);
+        student.save();
+      }
+    });
+
+    return 'oke';
   }
 }

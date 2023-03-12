@@ -86,7 +86,6 @@ export class MealsController {
   @Roles(Role.Admin, Role.Parents, Role.Student)
   @AuthApiError()
   @ApiOperation({ summary: 'Get meals by week' })
-  // @ApiOkResponse({ type: [Meals] })
   @Get('by-week')
   async getMealsByWeek(@Query() timestampDto: TimestampDto, @Req() req) {
     return await this.mealsService.getMealsByWeek(timestampDto.ts, req.user);

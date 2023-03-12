@@ -32,7 +32,7 @@ export class GradeService {
     return newGrade;
   }
 
-  async findAll(
+  async findAllWithPaging(
     user,
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<Grade>> {
@@ -53,6 +53,14 @@ export class GradeService {
       total,
       results: grades,
     };
+  }
+
+  async findAll(school) {
+    const grades = await this.gradeModel
+      .find({ school })
+      .select('-deleted -createdAt -updatedAt');
+
+    return grades;
   }
 
   async findGradeById(user, id: string) {

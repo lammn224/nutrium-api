@@ -56,7 +56,7 @@ export class GradeController {
     @Query() queries: PaginationRequestFullDto,
     @Req() req,
   ): Promise<PaginationDto<Grade>> {
-    return await this.gradeService.findAll(req.user, queries);
+    return await this.gradeService.findAllWithPaging(req.user, queries);
   }
 
   @Roles(Role.Admin)

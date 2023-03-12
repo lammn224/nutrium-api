@@ -35,7 +35,7 @@ export class ClassesController {
     @Query() queries: PaginationRequestFullDto,
     @Req() req,
   ): Promise<PaginationDto<Classes>> {
-    return await this.classesService.findAll(req.user, queries);
+    return await this.classesService.findAllWithPaging(req.user, queries);
   }
 
   @Roles(Role.Admin)

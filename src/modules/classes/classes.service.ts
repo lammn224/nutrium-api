@@ -42,7 +42,7 @@ export class ClassesService {
     return classObj;
   }
 
-  async findAll(
+  async findAllWithPaging(
     user,
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<Classes>> {
@@ -73,5 +73,16 @@ export class ClassesService {
       total,
       results: classes,
     };
+  }
+
+  async findAllClassesByGrade(grade) {
+    const classes = await this.classesModel
+      .find({ grade })
+      .populate({
+        path: 'members',
+      })
+      .select('-deleted -createdAt -updatedAt');
+
+    return classes;
   }
 }
