@@ -4,12 +4,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import {
+  PARENTS_ACCOUNT_EXISTED,
+  PARENTS_ACCOUNT_NOT_FOUND,
   USER_NOT_EXIST,
   USER_NOT_EXIST_OR_DELETED,
   WRONG_USER_OR_PASSWORD,
 } from '@/constants/error-codes.constant';
 import { UserStatus } from './enum/user-status.enum';
-import { throwNotFound } from '@/utils/exception.utils';
+import { throwBadRequest, throwNotFound } from '@/utils/exception.utils';
 import { CreateSchoolUserDto } from './dto/create-school-user.dto';
 import { Role } from '@/enums/role.enum';
 import { CreateParentsDto } from '@/modules/school-users/dto/create-parents.dto';
@@ -38,7 +40,7 @@ export class SchoolUsersService {
         phoneNumber: createParentsDto.phoneNumber,
       })
       .session(session);
-    console.log('isExistedParents', isExistedParents);
+
     if (isExistedParents) {
       isExistedParents.child.push(newStudent);
       await isExistedParents.save({ session });
@@ -57,18 +59,33 @@ export class SchoolUsersService {
     school,
     createParentsDto: CreateParentsDto,
     newStudent,
+    isExistedParentAcc,
   ) {
+    if (isExistedParentAcc) {
+      const isExistedParents = await this.schoolUserModel.findOne({
+        school,
+        phoneNumber: createParentsDto.phoneNumber,
+      });
+
+      if (!isExistedParents) {
+        throwNotFound(PARENTS_ACCOUNT_NOT_FOUND);
+      }
+
+      isExistedParents.child.push(newStudent);
+      await isExistedParents.save();
+
+      return isExistedParents;
+    }
+
     const isExistedParents = await this.schoolUserModel.findOne({
       school,
       phoneNumber: createParentsDto.phoneNumber,
     });
 
     if (isExistedParents) {
-      isExistedParents.child.push(newStudent);
-      await isExistedParents.save();
-
-      return isExistedParents;
+      throwBadRequest(PARENTS_ACCOUNT_EXISTED);
     }
+
     const newParents = await this.schoolUserModel.create({
       ...createParentsDto,
     });

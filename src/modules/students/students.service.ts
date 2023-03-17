@@ -7,7 +7,7 @@ import {
   USER_NOT_EXIST_OR_DELETED,
   WRONG_USER_OR_PASSWORD,
 } from '@/constants/error-codes.constant';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Student, StudentDocument } from '@/modules/students/students.schema';
 import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
@@ -32,6 +32,7 @@ export class StudentsService {
     private readonly schoolUserService: SchoolUsersService,
     private readonly gradeService: GradeService,
     private readonly classesService: ClassesService,
+    @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
   async me(userId) {
@@ -120,43 +121,62 @@ export class StudentsService {
       throwBadRequest(STUDENT_ID_ALREADY_EXISTED);
     }
 
-    const newStudent = await this.studentModel.create({
-      studentId: createStudentDto.studentId,
-      fullName: createStudentDto.fullName,
-      gender: createStudentDto.gender,
-      dateOfBirth: createStudentDto.dateOfBirth,
-      password: createStudentDto.studentId,
-      class: createStudentDto.class,
-      school: user.school,
-      status: UserStatus.active,
-      role: Role.Student,
-    });
+    const session = await this.connection.startSession();
 
-    await this.classesService.addMemberToClass(
-      user,
-      newStudent._id,
-      createStudentDto.class,
-    );
+    session.startTransaction();
+    try {
+      const [newStudent] = await this.studentModel.create(
+        [
+          {
+            studentId: createStudentDto.studentId,
+            fullName: createStudentDto.fullName,
+            gender: createStudentDto.gender,
+            dateOfBirth: createStudentDto.dateOfBirth,
+            password: createStudentDto.studentId,
+            class: createStudentDto.class,
+            school: user.school,
+            status: UserStatus.active,
+            role: Role.Student,
+          },
+        ],
+        { session },
+      );
 
-    const parentObj = {
-      fullName: createStudentDto.parentsFullName,
-      phoneNumber: createStudentDto.parentsPhoneNumber,
-      password: createStudentDto.parentsPhoneNumber,
-      school: user.school,
-      child: [newStudent._id],
-      status: UserStatus.active,
-      role: Role.Parents,
-    };
+      const parentObj = {
+        fullName: createStudentDto.parentsFullName,
+        phoneNumber: createStudentDto.parentsPhoneNumber,
+        password: createStudentDto.parentsPhoneNumber,
+        school: user.school,
+        child: [newStudent._id],
+        status: UserStatus.active,
+        role: Role.Parents,
+      };
 
-    const parents = await this.schoolUserService.createParentsByAdmin(
-      user.school,
-      parentObj,
-      newStudent._id,
-    );
+      const parents = await this.schoolUserService.createParentsByAdmin(
+        user.school,
+        parentObj,
+        newStudent._id,
+        createStudentDto.isExistedParentAcc,
+      );
 
-    newStudent.parents = parents._id;
-    await newStudent.save();
-    return newStudent;
+      newStudent.parents = parents._id;
+      await newStudent.save();
+
+      await this.classesService.addMemberToClass(
+        user,
+        newStudent._id,
+        createStudentDto.class,
+      );
+
+      await session.commitTransaction();
+
+      // return newStudent;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async attempt(studentId: string, password: string, school: string) {

@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
 
@@ -23,7 +29,8 @@ export class CreateStudentDto {
   @ApiProperty({ type: Number, required: true })
   dateOfBirth;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @ApiProperty({ type: String, required: true })
   parentsFullName;
@@ -37,4 +44,8 @@ export class CreateStudentDto {
   @IsString()
   @ApiProperty({ type: String, required: true })
   class: string;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Boolean, required: false })
+  isExistedParentAcc: boolean;
 }
