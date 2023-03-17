@@ -96,8 +96,13 @@ export class StudentsService {
       session,
     });
 
-    parentObj.child = newStudent._id;
-    const parents = await this.schoolUserService.createParents(parentObj);
+    parentObj.child = [newStudent._id];
+    const parents = await this.schoolUserService.createParents(
+      school,
+      parentObj,
+      newStudent._id,
+      session,
+    );
 
     newStudent.parents = parents._id;
     await newStudent.save({ session });
@@ -138,12 +143,16 @@ export class StudentsService {
       phoneNumber: createStudentDto.parentsPhoneNumber,
       password: createStudentDto.parentsPhoneNumber,
       school: user.school,
-      child: newStudent._id,
+      child: [newStudent._id],
       status: UserStatus.active,
       role: Role.Parents,
     };
 
-    const parents = await this.schoolUserService.createParents(parentObj);
+    const parents = await this.schoolUserService.createParentsByAdmin(
+      user.school,
+      parentObj,
+      newStudent._id,
+    );
 
     newStudent.parents = parents._id;
     await newStudent.save();

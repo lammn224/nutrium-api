@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SchoolUser, SchoolUserDocument } from './school-user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import {
   USER_NOT_EXIST,
@@ -26,12 +26,49 @@ export class SchoolUsersService {
     private schoolUserModel: Model<SchoolUserDocument>,
   ) {}
 
-  async createParents(createParentsDto: CreateParentsDto) {
-    // const isExistedParents = await this.schoolUserModel.findOne({
-    //   phoneNumber: createParentsDto.phoneNumber,
-    // });
-    // if (isExistedParents) return isExistedParents;
+  async createParents(
+    school,
+    createParentsDto: CreateParentsDto,
+    newStudent,
+    session: mongoose.ClientSession | null = null,
+  ) {
+    const isExistedParents = await this.schoolUserModel
+      .findOne({
+        school,
+        phoneNumber: createParentsDto.phoneNumber,
+      })
+      .session(session);
+    console.log('isExistedParents', isExistedParents);
+    if (isExistedParents) {
+      isExistedParents.child.push(newStudent);
+      await isExistedParents.save({ session });
 
+      return isExistedParents;
+    }
+
+    const [newParents] = await this.schoolUserModel.create([createParentsDto], {
+      session,
+    });
+
+    return newParents;
+  }
+
+  async createParentsByAdmin(
+    school,
+    createParentsDto: CreateParentsDto,
+    newStudent,
+  ) {
+    const isExistedParents = await this.schoolUserModel.findOne({
+      school,
+      phoneNumber: createParentsDto.phoneNumber,
+    });
+
+    if (isExistedParents) {
+      isExistedParents.child.push(newStudent);
+      await isExistedParents.save();
+
+      return isExistedParents;
+    }
     const newParents = await this.schoolUserModel.create({
       ...createParentsDto,
     });

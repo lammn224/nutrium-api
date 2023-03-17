@@ -62,8 +62,8 @@ export class SchoolUser {
 
   @IsString()
   @ApiProperty({ type: String })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Student' })
-  child: string | Student;
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Student' })
+  child: string[] | Student[];
 
   @Prop({ type: Number })
   createdAt: number;
