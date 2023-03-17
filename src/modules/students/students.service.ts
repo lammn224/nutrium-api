@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { throwBadRequest, throwNotFound } from '@/utils/exception.utils';
 import {
+  STUDENT_ID_ALREADY_EXISTED,
   UPLOAD_FAILED,
   USER_NOT_EXIST,
   USER_NOT_EXIST_OR_DELETED,
@@ -16,6 +17,12 @@ import { UpdateStudentInfoDto } from '@/modules/students/dto/update-student-info
 import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
 import { GradeService } from '@/modules/grade/grade.service';
 import { ClassesService } from '@/modules/classes/classes.service';
+import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
+import { PaginationDto } from '@/dtos/pagination-response.dto';
+import { SortType } from '@/enums/sort.enum';
+import { ResetPasswordDto } from '@/dtos/reset-password.dto';
+import { CreateStudentDto } from '@/modules/students/dto/create-student.dto';
+import { Role } from '@/enums/role.enum';
 
 @Injectable()
 export class StudentsService {
@@ -92,6 +99,51 @@ export class StudentsService {
     return newStudent;
   }
 
+  async createOneByAdmin(user, createStudentDto: CreateStudentDto) {
+    const isExistedStudent = await this.studentModel.findOne({
+      studentId: createStudentDto.studentId,
+      school: user.school,
+    });
+
+    if (isExistedStudent) {
+      throwBadRequest(STUDENT_ID_ALREADY_EXISTED);
+    }
+
+    const newStudent = await this.studentModel.create({
+      studentId: createStudentDto.studentId,
+      fullName: createStudentDto.fullName,
+      gender: createStudentDto.gender,
+      dateOfBirth: createStudentDto.dateOfBirth,
+      password: createStudentDto.studentId,
+      class: createStudentDto.class,
+      school: user.school,
+      status: UserStatus.active,
+      role: Role.Student,
+    });
+
+    await this.classesService.addMemberToClass(
+      user,
+      newStudent._id,
+      createStudentDto.class,
+    );
+
+    const parentObj = {
+      fullName: createStudentDto.parentsFullName,
+      phoneNumber: createStudentDto.parentsPhoneNumber,
+      password: createStudentDto.parentsPhoneNumber,
+      school: user.school,
+      child: newStudent._id,
+      status: UserStatus.active,
+      role: Role.Parents,
+    };
+
+    const parents = await this.schoolUserService.createParents(parentObj);
+
+    newStudent.parents = parents._id;
+    await newStudent.save();
+    return newStudent;
+  }
+
   async attempt(studentId: string, password: string, school: string) {
     const student = await this.studentModel.findOne({
       studentId,
@@ -138,6 +190,51 @@ export class StudentsService {
 
   async comparePassword(plainPass: string, password: string): Promise<boolean> {
     return await bcrypt.compare(plainPass, password);
+  }
+
+  async findAllWithFilter(
+    user,
+    paginationRequestFullDto: PaginationRequestFullDto,
+  ): Promise<PaginationDto<Student>> {
+    const filter = {
+      school: user.school,
+      ...(paginationRequestFullDto.keyword && {
+        fullName: {
+          $regex: `.*${paginationRequestFullDto.keyword}.*`,
+          $options: 'i',
+        },
+      }),
+    };
+
+    const sortObj = {};
+    sortObj[paginationRequestFullDto.sortBy] =
+      paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.studentModel.countDocuments(filter);
+
+    const students = await this.studentModel
+      .find(filter)
+      .populate('class')
+      .select('-deleted -createdAt -updatedAt')
+      .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: students,
+    };
+  }
+
+  async resetPasswordByAdmin(_id: string, resetPasswordDto: ResetPasswordDto) {
+    const student = await this.studentModel.findOne({ _id });
+
+    if (!student) {
+      throw new NotFoundException(USER_NOT_EXIST);
+    }
+
+    student.password = resetPasswordDto.newPassword;
+    await student.save();
   }
 
   async updateInfo(studentId, updateStudentInfoDto: UpdateStudentInfoDto) {

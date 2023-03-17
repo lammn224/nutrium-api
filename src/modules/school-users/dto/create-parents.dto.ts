@@ -5,6 +5,7 @@ export class CreateParentsDto extends PickType(SchoolUser, [
   'fullName',
   'password',
   'phoneNumber',
+  'school',
   'role',
   'status',
   'child',

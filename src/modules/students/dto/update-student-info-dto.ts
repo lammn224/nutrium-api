@@ -3,7 +3,6 @@ import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Student } from '@/modules/students/students.schema';
 import { Type } from 'class-transformer';
 import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
-import { Prop } from '@nestjs/mongoose';
 import { ActivityType } from '@/modules/students/enum/activity-type.enum';
 
 export class UpdateStudentInfoDto extends PickType(Student, [

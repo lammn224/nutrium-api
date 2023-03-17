@@ -4,6 +4,7 @@ export const DATA_REFERENCE = 'DATA_REFERENCE';
 // USER
 export const BLACKLIST_TOKEN = 'BLACKLIST_TOKEN';
 export const USER_NOT_EXIST = 'USER_NOT_EXIST';
+export const STUDENT_ID_ALREADY_EXISTED = 'STUDENT_ID_ALREADY_EXISTED';
 export const WRONG_USER_OR_PASSWORD = 'WRONG_USER_OR_PASSWORD';
 export const INACTIVE = 'INACTIVE';
 export const BLOCKED = 'BLOCKED';
@@ -38,6 +39,7 @@ export const ERROR_CODES = new Map<string, string>([
   [BLACKLIST_TOKEN, 'Token is in blacklist (logout, deleted, ...)'],
 
   [USER_NOT_EXIST, 'User is not exist'],
+  [STUDENT_ID_ALREADY_EXISTED, 'Student ID is already existed'],
   [WRONG_USER_OR_PASSWORD, 'User or password login are wrong.'],
   [INACTIVE, 'User account is not active.'],
   [BLOCKED, 'User account is blocked.'],

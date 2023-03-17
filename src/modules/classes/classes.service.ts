@@ -42,6 +42,19 @@ export class ClassesService {
     return classObj;
   }
 
+  async addMemberToClass(user, memberId, classId) {
+    const classObj = await this.classesModel.findOne({
+      _id: classId,
+      school: user.school,
+    });
+
+    classObj.members.push(memberId);
+
+    await classObj.save();
+
+    // return classObj;
+  }
+
   async findAllWithPaging(
     user,
     paginationRequestFullDto: PaginationRequestFullDto,

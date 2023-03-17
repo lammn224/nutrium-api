@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { SchoolUser, SchoolUserDocument } from './school-user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,6 +14,10 @@ import { CreateSchoolUserDto } from './dto/create-school-user.dto';
 import { Role } from '@/enums/role.enum';
 import { CreateParentsDto } from '@/modules/school-users/dto/create-parents.dto';
 import { UpdateUserInfoDto } from '@/modules/school-users/dto/update-user-info-dto';
+import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
+import { PaginationDto } from '@/dtos/pagination-response.dto';
+import { SortType } from '@/enums/sort.enum';
+import { ResetPasswordDto } from '@/dtos/reset-password.dto';
 
 @Injectable()
 export class SchoolUsersService {
@@ -152,5 +156,51 @@ export class SchoolUsersService {
     await schoolUser.save();
 
     return schoolUser;
+  }
+
+  async findAllWithFilter(
+    user,
+    paginationRequestFullDto: PaginationRequestFullDto,
+  ): Promise<PaginationDto<SchoolUser>> {
+    const filter = {
+      school: user.school,
+      role: Role.Parents,
+      ...(paginationRequestFullDto.keyword && {
+        fullName: {
+          $regex: `.*${paginationRequestFullDto.keyword}.*`,
+          $options: 'i',
+        },
+      }),
+    };
+
+    const sortObj = {};
+    sortObj[paginationRequestFullDto.sortBy] =
+      paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.schoolUserModel.countDocuments(filter);
+
+    const students = await this.schoolUserModel
+      .find(filter)
+      .populate('child')
+      .select('-deleted -createdAt -updatedAt')
+      .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: students,
+    };
+  }
+
+  async resetPasswordByAdmin(_id: string, resetPasswordDto: ResetPasswordDto) {
+    const parents = await this.schoolUserModel.findOne({ _id });
+
+    if (!parents) {
+      throw new NotFoundException(USER_NOT_EXIST);
+    }
+
+    parents.password = resetPasswordDto.newPassword;
+    await parents.save();
   }
 }
