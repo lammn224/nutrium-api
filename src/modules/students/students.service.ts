@@ -8,7 +8,7 @@ import {
   WRONG_USER_OR_PASSWORD,
 } from '@/constants/error-codes.constant';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Student, StudentDocument } from '@/modules/students/students.schema';
 import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import * as bcrypt from 'bcrypt';
@@ -80,22 +80,28 @@ export class StudentsService {
     return student;
   }
 
-  async createStudent(studentObj, parentObj, school) {
+  async createStudent(
+    studentObj,
+    parentObj,
+    school,
+    session: mongoose.ClientSession | null = null,
+  ) {
     const isExistedStudent = await this.studentModel.findOne({
       studentId: studentObj.studentId,
       school,
     });
     if (isExistedStudent) throwBadRequest(UPLOAD_FAILED);
 
-    const newStudent = await this.studentModel.create({
-      ...studentObj,
+    const [newStudent] = await this.studentModel.create([studentObj], {
+      session,
     });
 
     parentObj.child = newStudent._id;
     const parents = await this.schoolUserService.createParents(parentObj);
 
     newStudent.parents = parents._id;
-    await newStudent.save();
+    await newStudent.save({ session });
+
     return newStudent;
   }
 
