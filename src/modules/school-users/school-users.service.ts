@@ -100,6 +100,7 @@ export class SchoolUsersService {
     const owner = await this.schoolUserModel.create({
       school,
       ...createSchoolUserDto,
+      child: null,
       role: Role.Admin,
     });
 
@@ -190,6 +191,8 @@ export class SchoolUsersService {
         path: 'child',
         populate: 'class',
       });
+
+    if (user.role === Role.Admin) user.child = null;
 
     return user;
   }

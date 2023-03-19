@@ -25,11 +25,10 @@ export class FilesService {
     const workbook = await new Excel.Workbook().xlsx.readFile(filePath);
     const worksheets = workbook.worksheets;
 
-    const session = await this.connection.startSession();
-
-    session.startTransaction();
-    try {
-      for (const sheet of worksheets) {
+    for (const sheet of worksheets) {
+      const session = await this.connection.startSession();
+      session.startTransaction();
+      try {
         const members = [];
         const actualRows = sheet.actualRowCount - 4;
         const rows = sheet.getRows(7, actualRows);
@@ -38,6 +37,7 @@ export class FilesService {
           sheet.name,
           user.school.toString(),
           grade,
+          session,
         );
 
         for (const row of rows) {
@@ -77,16 +77,16 @@ export class FilesService {
             sheet.name,
             user.school.toString(),
             members,
+            session,
           );
         }
+        await session.commitTransaction();
+      } catch (error) {
+        await session.abortTransaction();
+        throw error;
+      } finally {
+        await session.endSession();
       }
-
-      await session.commitTransaction();
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      await session.endSession();
     }
   }
 }

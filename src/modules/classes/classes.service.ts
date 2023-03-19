@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Classes, ClassesDocument } from '@/modules/classes/classes.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 import { PaginationDto } from '@/dtos/pagination-response.dto';
 import { SortType } from '@/enums/sort.enum';
@@ -15,21 +15,39 @@ export class ClassesService {
     name: string,
     school: string,
     grade: string,
+    session: mongoose.ClientSession | null = null,
   ): Promise<Classes> {
-    const isExistedClass = await this.classesModel.findOne({ name, school });
+    const isExistedClass = await this.classesModel
+      .findOne({ name, school })
+      .session(session);
     if (isExistedClass) return isExistedClass;
-    return await this.classesModel.create({ name, school, grade });
+
+    const [newClass] = await this.classesModel.create(
+      [{ name, school, grade }],
+      { session },
+    );
+
+    return newClass;
   }
 
-  async addMember(name: string, school: string, members: any[]) {
-    const isExistedClass = await this.classesModel.findOne({ name, school });
+  async addMember(
+    name: string,
+    school: string,
+    members: any[],
+    session: mongoose.ClientSession | null = null,
+  ) {
+    const isExistedClass = await this.classesModel
+      .findOne({ name, school })
+      .session(session);
     if (isExistedClass) {
       isExistedClass.members = members;
-      await isExistedClass.save();
+      await isExistedClass.save({ session });
 
       return isExistedClass;
     }
-    return await this.classesModel.create({ name, school, members });
+    return await this.classesModel.create([{ name, school, members }], {
+      session,
+    });
   }
 
   async findClassById(user, id: string) {
