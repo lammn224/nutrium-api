@@ -30,14 +30,11 @@ export class MealsService {
   ) {}
 
   async create(createMealDto: CreateMealDto, user) {
-    if (user.role === Role.Parents) {
-      createMealDto.student = user.child;
-    }
-
     const isExistMeal = await this.mealModel.findOne({
       school: user.school,
       type: createMealDto.type,
       date: createMealDto.date,
+      student: createMealDto.student,
       createdBy: user._id,
     });
 
@@ -46,7 +43,11 @@ export class MealsService {
     }
 
     if (user.child) {
-      const student = await this.studentService.findById(user.child);
+      const studentId = user.child.find(
+        (item) => item.toString() === createMealDto.student,
+      );
+
+      const student = await this.studentService.findById(studentId);
 
       if (createMealDto.type === MealType.Breakfast) {
         if (createMealDto.power > student.maxBreakfastCalories) {
@@ -79,7 +80,11 @@ export class MealsService {
     }
 
     if (user.child) {
-      const student = await this.studentService.findById(user.child);
+      const studentId = user.child.find(
+        (item) => item.toString() === updateMealDto.student,
+      );
+
+      const student = await this.studentService.findById(studentId);
 
       if (updateMealDto.type === MealType.Breakfast) {
         if (updateMealDto.power > student.maxBreakfastCalories) {
@@ -104,14 +109,17 @@ export class MealsService {
   async findAll(user): Promise<Meals[]> {
     if (user.role === Role.Admin) {
       const meals = await this.mealModel.find({
+        type: MealType.Launch,
         school: user.school,
-        createdBy: user._id,
+        isCreatedByAdmin: true,
+        // createdBy: user._id,
       });
 
       return meals;
     } else if (user.role === Role.Parents) {
       const mealsByUser = await this.mealModel
         .find({ school: user.school, createdBy: user._id })
+        .populate({ path: 'student' })
         .select('-deleted -createdAt -updatedAt');
 
       const mealsByAdmin = await this.mealModel.find({
@@ -124,19 +132,21 @@ export class MealsService {
     } else {
       const mealsByParent = await this.mealModel
         .find({ school: user.school, createdBy: user.parents })
+        .populate({ path: 'student' })
         .select('-deleted -createdAt -updatedAt');
 
-      const mealsByAdmin = await this.mealModel.find({
-        school: user.school,
-        type: MealType.Launch,
-        createdBy: { $ne: user.parents },
-      });
-
+      const mealsByAdmin = await this.mealModel
+        .find({
+          school: user.school,
+          type: MealType.Launch,
+          createdBy: { $ne: user.parents },
+        })
+        .populate({ path: 'student' });
       return [...mealsByAdmin, ...mealsByParent];
     }
   }
 
-  async getMealsByWeek(ts = Math.floor(Date.now() / 1000), user) {
+  async getMealsByWeek(ts = Math.floor(Date.now() / 1000), user, studentId) {
     const date = new Date(
       (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
     );
@@ -159,8 +169,9 @@ export class MealsService {
       const mealsByAdmin = await this.mealModel
         .find({
           ...filter,
-          createdBy: user._id,
+          type: MealType.Launch,
           school: user.school,
+          isCreatedByAdmin: true,
         })
         .sort({ type: 1 });
 
@@ -171,6 +182,7 @@ export class MealsService {
           ...filter,
           type: MealType.Launch,
           school: user.school,
+          isCreatedByAdmin: true,
         })
         .sort({ type: 1 });
 
@@ -179,6 +191,8 @@ export class MealsService {
           ...filter,
           createdBy: user._id,
           school: user.school,
+          student: studentId,
+          isCreatedByAdmin: false,
         })
         .sort({ type: 1 });
 
@@ -189,6 +203,7 @@ export class MealsService {
           ...filter,
           type: MealType.Launch,
           school: user.school,
+          isCreatedByAdmin: true,
         })
         .sort({ type: 1 });
 
@@ -197,6 +212,8 @@ export class MealsService {
           ...filter,
           createdBy: user.parents,
           school: user.school,
+          student: studentId,
+          isCreatedByAdmin: false,
         })
         .sort({ type: 1 });
 
@@ -271,8 +288,9 @@ export class MealsService {
       const mealsByAdmin = await this.mealModel
         .find({
           ...filter,
-          createdBy: user._id,
+          type: MealType.Launch,
           school: user.school,
+          isCreatedByAdmin: true,
         })
         .sort({ type: 1 });
 
@@ -280,6 +298,8 @@ export class MealsService {
         .find({
           ...filter,
           createdBy: student.parents,
+          student: studentId,
+          isCreatedByAdmin: false,
         })
         .sort({ type: 1 });
 
@@ -290,6 +310,7 @@ export class MealsService {
           ...filter,
           type: MealType.Launch,
           school: user.school,
+          isCreatedByAdmin: true,
         })
         .sort({ type: 1 });
 
@@ -298,6 +319,8 @@ export class MealsService {
           ...filter,
           createdBy: user._id,
           school: user.school,
+          student: studentId,
+          isCreatedByAdmin: false,
         })
         .sort({ type: 1 });
 
@@ -308,6 +331,7 @@ export class MealsService {
           ...filter,
           type: MealType.Launch,
           school: user.school,
+          isCreatedByAdmin: true,
         })
         .sort({ type: 1 });
 
@@ -316,6 +340,8 @@ export class MealsService {
           ...filter,
           createdBy: user.parents,
           school: user.school,
+          student: studentId,
+          isCreatedByAdmin: false,
         })
         .sort({ type: 1 });
 

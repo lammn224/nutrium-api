@@ -16,6 +16,7 @@ import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
 import { Student } from '@/modules/students/students.schema';
 import { School } from '@/modules/schools/schools.schema';
 import { SchoolUser } from '@/modules/school-users/school-user.schema';
+import { boolean } from 'joi';
 
 export type MealsDocument = Meals & Document;
 
@@ -95,6 +96,11 @@ export class Meals {
   @ApiProperty({ type: String })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: SchoolUser.name })
   createdBy: string | SchoolUser;
+
+  // @IsOptional()
+  @ApiProperty({ type: Boolean })
+  @Prop({ type: Boolean, default: false })
+  isCreatedByAdmin: boolean;
 
   @Prop({ type: Number })
   createdAt: number;

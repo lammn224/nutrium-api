@@ -86,8 +86,12 @@ export class MealsController {
   @Roles(Role.Admin, Role.Parents, Role.Student)
   @AuthApiError()
   @ApiOperation({ summary: 'Get meals by week' })
-  @Get('by-week')
+  @Get('by-week-per-student-chart')
   async getMealsByWeek(@Query() timestampDto: TimestampDto, @Req() req) {
-    return await this.mealsService.getMealsByWeek(timestampDto.ts, req.user);
+    return await this.mealsService.getMealsByWeek(
+      timestampDto.ts,
+      req.user,
+      timestampDto.studentId,
+    );
   }
 }

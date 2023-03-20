@@ -28,6 +28,7 @@ import { Role } from '@/enums/role.enum';
 import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 import { IdRequestDto } from '@/dtos/id-request.dto';
 import { ResetPasswordDto } from '@/dtos/reset-password.dto';
+import { CreateSchoolUserDto } from '@/modules/school-users/dto/create-school-user.dto';
 
 @ApiExtraModels(PaginationDto)
 @ApiBearerAuth()
@@ -61,12 +62,45 @@ export class SchoolUsersController {
   @AuthApiError()
   @ApiOperation({ summary: 'Find all parents with paging' })
   @PaginationResponse(SchoolUser)
-  @Get()
-  async findAllWithFilter(
+  @Get('/parents')
+  async findAllParentsAccountWithFilter(
     @Request() req,
     @Query() queries: PaginationRequestFullDto,
   ) {
-    return await this.schoolUsersService.findAllWithFilter(req.user, queries);
+    return await this.schoolUsersService.findAllParentsAccountWithFilter(
+      req.user,
+      queries,
+    );
+  }
+
+  @Roles(Role.Admin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Find all admins with paging' })
+  @PaginationResponse(SchoolUser)
+  @Get('/admin')
+  async findAllAdminAccountWithFilter(
+    @Request() req,
+    @Query() queries: PaginationRequestFullDto,
+  ) {
+    return await this.schoolUsersService.findAllAdminAccountWithFilter(
+      req.user,
+      queries,
+    );
+  }
+
+  @Roles(Role.Admin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Create admin account' })
+  @PaginationResponse(SchoolUser)
+  @Post('/admin')
+  async createAdminAccount(
+    @Request() req,
+    @Body() createSchoolUserDto: CreateSchoolUserDto,
+  ) {
+    return await this.schoolUsersService.createAdminAccount(
+      req.user.school,
+      createSchoolUserDto,
+    );
   }
 
   @Roles(Role.Admin)

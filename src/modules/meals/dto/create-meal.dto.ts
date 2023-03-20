@@ -14,6 +14,7 @@ export class CreateMealDto extends PickType(Meals, [
   'foods',
   'school',
   'student',
+  'isCreatedByAdmin',
 ] as const) {
   @ApiProperty({ enum: MealType, default: MealType.Launch })
   @IsNotEmpty()

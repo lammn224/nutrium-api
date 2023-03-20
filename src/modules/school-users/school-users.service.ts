@@ -107,6 +107,20 @@ export class SchoolUsersService {
     return owner;
   }
 
+  async createAdminAccount(
+    school: string,
+    createSchoolUserDto: CreateSchoolUserDto,
+  ): Promise<SchoolUser> {
+    const newAdmin = await this.schoolUserModel.create({
+      school,
+      ...createSchoolUserDto,
+      child: null,
+      role: Role.Admin,
+    });
+
+    return newAdmin;
+  }
+
   async findById(id: string): Promise<SchoolUser> {
     const schoolUser = await this.schoolUserModel.findOne({ _id: id });
 
@@ -215,13 +229,48 @@ export class SchoolUsersService {
     return schoolUser;
   }
 
-  async findAllWithFilter(
+  async findAllParentsAccountWithFilter(
     user,
     paginationRequestFullDto: PaginationRequestFullDto,
   ): Promise<PaginationDto<SchoolUser>> {
     const filter = {
       school: user.school,
       role: Role.Parents,
+      ...(paginationRequestFullDto.keyword && {
+        fullName: {
+          $regex: `.*${paginationRequestFullDto.keyword}.*`,
+          $options: 'i',
+        },
+      }),
+    };
+
+    const sortObj = {};
+    sortObj[paginationRequestFullDto.sortBy] =
+      paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.schoolUserModel.countDocuments(filter);
+
+    const students = await this.schoolUserModel
+      .find(filter)
+      .populate('child')
+      .select('-deleted -createdAt -updatedAt')
+      .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: students,
+    };
+  }
+
+  async findAllAdminAccountWithFilter(
+    user,
+    paginationRequestFullDto: PaginationRequestFullDto,
+  ): Promise<PaginationDto<SchoolUser>> {
+    const filter = {
+      school: user.school,
+      role: Role.Admin,
       ...(paginationRequestFullDto.keyword && {
         fullName: {
           $regex: `.*${paginationRequestFullDto.keyword}.*`,
