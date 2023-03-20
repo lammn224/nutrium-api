@@ -40,6 +40,7 @@ export class StudentsService {
       .findOne({ _id: userId })
       .populate({
         path: 'parents',
+        populate: 'child',
       })
       .populate({
         path: 'school',

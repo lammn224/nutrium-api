@@ -4,8 +4,11 @@ import { Model } from 'mongoose';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { SchoolUsersService } from '../school-users/school-users.service';
 import { School, SchoolDocument } from './schools.schema';
-import { throwNotFound } from '@/utils/exception.utils';
-import { SCHOOL_NOT_EXIST } from '@/constants/error-codes.constant';
+import { throwBadRequest, throwNotFound } from '@/utils/exception.utils';
+import {
+  SCHOOL_CODE_EXISTED,
+  SCHOOL_NOT_EXIST,
+} from '@/constants/error-codes.constant';
 
 @Injectable()
 export class SchoolsService {
@@ -47,6 +50,8 @@ export class SchoolsService {
     filter[key] = value;
 
     const school = await this.schoolModel.findOne(filter);
+
+    if (school) throwBadRequest(SCHOOL_CODE_EXISTED);
 
     return !!school;
   }

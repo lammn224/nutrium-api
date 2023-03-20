@@ -35,6 +35,8 @@ export const MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES =
 export const MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES =
   'MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES';
 
+export const SCHOOL_CODE_EXISTED = 'SCHOOL_CODE_EXISTED';
+
 export const ERROR_CODES = new Map<string, string>([
   [DATA_REFERENCE, 'Data reference'],
 
@@ -74,4 +76,5 @@ export const ERROR_CODES = new Map<string, string>([
 
   [PARENTS_ACCOUNT_NOT_FOUND, 'Parents account is not found'],
   [PARENTS_ACCOUNT_EXISTED, 'Parents account is already existed'],
+  [SCHOOL_CODE_EXISTED, 'School code is already existed'],
 ]);

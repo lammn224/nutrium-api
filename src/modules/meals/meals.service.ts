@@ -131,7 +131,11 @@ export class MealsService {
       return [...mealsByAdmin, ...mealsByUser];
     } else {
       const mealsByParent = await this.mealModel
-        .find({ school: user.school, createdBy: user.parents })
+        .find({
+          school: user.school,
+          createdBy: user.parents,
+          student: user._id,
+        })
         .populate({ path: 'student' })
         .select('-deleted -createdAt -updatedAt');
 
