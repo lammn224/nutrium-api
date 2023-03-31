@@ -98,6 +98,7 @@ export class Meals {
   createdBy: string | SchoolUser;
 
   // @IsOptional()
+  @IsNotEmpty()
   @ApiProperty({ type: Boolean })
   @Prop({ type: Boolean, default: false })
   isCreatedByAdmin: boolean;

@@ -21,6 +21,7 @@ export class GradeService {
   async createGrade(createGradeDto: CreateGradeDto) {
     const isExistedGrade = await this.gradeModel.findOne({
       name: createGradeDto.name,
+      school: createGradeDto.school,
     });
     if (isExistedGrade) throwBadRequest(GRADE_EXISTED);
 
