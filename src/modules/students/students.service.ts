@@ -383,6 +383,10 @@ export class StudentsService {
         student.activityType = array[Math.floor(Math.random() * array.length)];
         student.height = this.generateRandom(170, 185);
         student.weight = this.generateRandom(58, 70);
+        student.bmi =
+          Math.round(
+            ((student.weight * 10000) / (student.height * student.height)) * 10,
+          ) / 10;
         student.save();
       } else {
         student.activityType = array[Math.floor(Math.random() * array.length)];

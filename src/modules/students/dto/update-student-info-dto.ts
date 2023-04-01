@@ -10,6 +10,7 @@ export class UpdateStudentInfoDto extends PickType(Student, [
   'dateOfBirth',
   'weight',
   'height',
+  'bmi',
   'rcmCalories',
   'gender',
 ] as const) {
@@ -34,6 +35,12 @@ export class UpdateStudentInfoDto extends PickType(Student, [
   @IsNumber()
   @ApiProperty({ type: Number })
   height: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @ApiProperty({ type: Number })
+  bmi: number;
 
   @IsOptional()
   @IsEnum(UserGender)

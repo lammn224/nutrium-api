@@ -74,6 +74,11 @@ export class Student {
   @Prop({ type: Number, default: 0 })
   height: number;
 
+  @IsNumber()
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  bmi: number;
+
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })
   rcmCalories: number;
