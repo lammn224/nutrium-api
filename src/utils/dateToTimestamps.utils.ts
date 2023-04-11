@@ -12,7 +12,6 @@ export function convertTimeStampsToString(ts) {
   const year = date.getFullYear();
   const month = padTo2Digits(date.getMonth() + 1);
   const day = padTo2Digits(date.getDate());
-
   return `${day}/${month}/${year}`;
 }
 
