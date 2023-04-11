@@ -53,7 +53,7 @@ export class MealsService {
         if (createMealDto.power > student.maxBreakfastCalories) {
           throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
         }
-      } else {
+      } else if (createMealDto.type === MealType.Dinner) {
         if (createMealDto.power > student.maxDinnerCalories) {
           throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
         }
@@ -90,7 +90,7 @@ export class MealsService {
         if (updateMealDto.power > student.maxBreakfastCalories) {
           throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
         }
-      } else {
+      } else if (updateMealDto.type === MealType.Dinner) {
         if (updateMealDto.power > student.maxDinnerCalories) {
           throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
         }
