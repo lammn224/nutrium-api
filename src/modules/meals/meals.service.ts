@@ -392,4 +392,59 @@ export class MealsService {
 
     return [res];
   }
+
+  async cloneMealsLastWeek(dayChecked, user) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const res = [];
+
+    //check isWeekend?
+    if (today.getDay() == 0 || today.getDay() == 6) {
+      console.log('cannot clone meal at weekend');
+      return;
+    }
+
+    for (let i = 0; i < dayChecked.length; i++) {
+      const dateFilter =
+        new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate() - 7 - today.getDay() + dayChecked[i],
+        ).getTime() / 1000;
+
+      const meal = await this.mealModel.findOne({
+        type: MealType.Launch,
+        createdBy: user._id,
+        date: dateFilter,
+      });
+
+      if (!meal) continue;
+
+      const newMealClone: Meals = {
+        ...meal.toObject(),
+        date: dateFilter + 604800, // +7 days
+        student: null,
+      };
+
+      const isExistMeal = await this.mealModel.findOne({
+        type: MealType.Launch,
+        createdBy: user._id,
+        date: dateFilter + 604800,
+      });
+
+      if (isExistMeal) {
+        await isExistMeal.delete();
+      }
+
+      delete newMealClone.createdAt;
+      delete newMealClone.updatedAt;
+      delete newMealClone._id;
+
+      const newMeal = await this.mealModel.create(newMealClone);
+
+      res.push(newMeal);
+    }
+
+    return res;
+  }
 }

@@ -25,6 +25,7 @@ import { IdRequestDto } from '@/dtos/id-request.dto';
 import { UpdateMealDto } from '@/modules/meals/dto/update-meal.dto';
 import { TimestampDto } from '@/modules/meals/dto/timestamp.dto';
 import { MealPerStudentDto } from '@/modules/meals/dto/meal-per-student.dto';
+import { CloneMealLastWeekDto } from '@/modules/meals/dto/clone-meal-last-week.dto';
 
 @ApiTags('Meals')
 @ApiBearerAuth()
@@ -92,6 +93,20 @@ export class MealsController {
       timestampDto.ts,
       req.user,
       timestampDto.studentId,
+    );
+  }
+
+  @Roles(Role.Admin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Clone meal last week' })
+  @Post('clone-meal-last-week')
+  async cloneMealsLastWeek(
+    @Body() cloneMealLastWeekDto: CloneMealLastWeekDto,
+    @Req() req,
+  ) {
+    return await this.mealsService.cloneMealsLastWeek(
+      cloneMealLastWeekDto.dayChecked,
+      req.user,
     );
   }
 }
