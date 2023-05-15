@@ -105,6 +105,8 @@ export class MealsController {
     @Req() req,
   ) {
     return await this.mealsService.cloneMealsLastWeek(
+      cloneMealLastWeekDto.srcWeek,
+      cloneMealLastWeekDto.desWeek,
       cloneMealLastWeekDto.dayChecked,
       req.user,
     );

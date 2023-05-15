@@ -393,23 +393,29 @@ export class MealsService {
     return [res];
   }
 
-  async cloneMealsLastWeek(dayChecked, user) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  async cloneMealsLastWeek(srcWeek, desWeek, dayChecked, user) {
     const res = [];
 
-    //check isWeekend?
-    if (today.getDay() == 0 || today.getDay() == 6) {
-      console.log('cannot clone meal at weekend');
-      return;
-    }
+    const startDateSrcWeek = new Date(srcWeek);
+    const startDateDesWeek = new Date(desWeek);
 
     for (let i = 0; i < dayChecked.length; i++) {
       const dateFilter =
         new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate() - 7 - today.getDay() + dayChecked[i],
+          startDateSrcWeek.getFullYear(),
+          startDateSrcWeek.getMonth(),
+          startDateSrcWeek.getDate() -
+            startDateSrcWeek.getDay() +
+            dayChecked[i],
+        ).getTime() / 1000;
+
+      const newDateCreated =
+        new Date(
+          startDateDesWeek.getFullYear(),
+          startDateDesWeek.getMonth(),
+          startDateDesWeek.getDate() -
+            startDateDesWeek.getDay() +
+            dayChecked[i],
         ).getTime() / 1000;
 
       const meal = await this.mealModel.findOne({
@@ -422,14 +428,14 @@ export class MealsService {
 
       const newMealClone: Meals = {
         ...meal.toObject(),
-        date: dateFilter + 604800, // +7 days
+        date: newDateCreated,
         student: null,
       };
 
       const isExistMeal = await this.mealModel.findOne({
         type: MealType.Launch,
         createdBy: user._id,
-        date: dateFilter + 604800,
+        date: newDateCreated,
       });
 
       if (isExistMeal) {
