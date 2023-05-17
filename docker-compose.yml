@@ -1,0 +1,19 @@
+version: '2.2'
+services:
+  app:
+    image: lammn224/nutrium-ws
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
