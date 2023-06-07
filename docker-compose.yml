@@ -1,7 +1,14 @@
 version: '2.2'
 services:
-  app:
-    image: lammn224/nutrium-ws
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    container_name: redis_cache
+
+  nutrium-ws:
+    image: lammn224/nutrium-ws:v1-ubuntu
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
@@ -10,10 +17,13 @@ services:
     depends_on:
       - redis
     environment:
-      - REDIS_HOST=redis
+      - REDIS_HOST=redis_cache
+    container_name: nutrium-ws
 
-  redis:
-    image: redis
-    restart: always
+  nutrium-web:
+    image: lammn224/nutrium-web:v1
     ports:
-      - "6379:6379"
+      - "8000:8000"
+    depends_on:
+      - nutrium-ws
+    container_name: nutrium-web-2

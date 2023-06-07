@@ -28,6 +28,7 @@ import { ClassesModule } from './modules/classes/classes.module';
 import { StudentsModule } from './modules/students/students.module';
 import { MealsModule } from './modules/meals/meals.module';
 import { GradeModule } from '@/modules/grade/grade.module';
+import { HealthCheckApiMiddleware } from '@/middlewares/health-check-api.middleware';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -86,7 +87,7 @@ import { GradeModule } from '@/modules/grade/grade.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer
-      .apply(TokenBlacklistMiddleware)
+      .apply(TokenBlacklistMiddleware, HealthCheckApiMiddleware)
       .exclude('auth/login')
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
