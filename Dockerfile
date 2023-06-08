@@ -12,7 +12,7 @@ RUN yarn build
 
 EXPOSE 3000
 
-ENV REDIS_HOST=redis_cache
+ENV REDIS_HOST=redis-cache
 ENV REDIS_PORT=6379
 
 CMD ["yarn", "start:prod" ]

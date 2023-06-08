@@ -28,7 +28,9 @@ import { ClassesModule } from './modules/classes/classes.module';
 import { StudentsModule } from './modules/students/students.module';
 import { MealsModule } from './modules/meals/meals.module';
 import { GradeModule } from '@/modules/grade/grade.module';
+import { ActivityModule } from '@/modules/activities/activity.module';
 import { HealthCheckApiMiddleware } from '@/middlewares/health-check-api.middleware';
+import { ScheduleExerciseModule } from '@/modules/scheduleExercise/scheduleExercise.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -69,6 +71,8 @@ import { HealthCheckApiMiddleware } from '@/middlewares/health-check-api.middlew
     StudentsModule,
     MealsModule,
     GradeModule,
+    ActivityModule,
+    ScheduleExerciseModule,
   ],
   controllers: [AppController],
   providers: [

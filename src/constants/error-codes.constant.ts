@@ -22,6 +22,9 @@ export const SCHOOL_NOT_EXIST = 'SCHOOL_NOT_EXIST';
 export const GRADE_EXISTED = 'GRADE_EXISTED';
 export const GRADE_NOT_EXISTED = 'GRADE_NOT_EXISTED';
 
+export const ACTIVITY_EXISTED = 'ACTIVITY_EXISTED';
+export const ACTIVITY_NOT_EXISTED = 'ACTIVITY_NOT_EXISTED';
+
 //FOOD
 export const FOOD_NOT_EXIST = 'FOOD_NOT_EXIST';
 
@@ -36,6 +39,9 @@ export const MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES =
   'MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES';
 
 export const SCHOOL_CODE_EXISTED = 'SCHOOL_CODE_EXISTED';
+
+export const SCHEDULE_EXISTED = 'SCHEDULE_EXISTED';
+export const SCHEDULE_NOT_EXISTED = 'SCHEDULE_NOT_EXISTED';
 
 export const ERROR_CODES = new Map<string, string>([
   [DATA_REFERENCE, 'Data reference'],
@@ -71,10 +77,15 @@ export const ERROR_CODES = new Map<string, string>([
     MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES,
     'Meal has overcome dinner calories limit',
   ],
+  [ACTIVITY_EXISTED, 'Activity is already existed'],
+  [ACTIVITY_NOT_EXISTED, 'Activity is not existed'],
+
   [GRADE_EXISTED, 'Grade is already existed'],
   [GRADE_NOT_EXISTED, 'Grade is not existed'],
 
   [PARENTS_ACCOUNT_NOT_FOUND, 'Parents account is not found'],
   [PARENTS_ACCOUNT_EXISTED, 'Parents account is already existed'],
   [SCHOOL_CODE_EXISTED, 'School code is already existed'],
+  [SCHEDULE_EXISTED, 'Schedule exercise is already existed'],
+  [SCHEDULE_NOT_EXISTED, 'Schedule exercise is not exist'],
 ]);
