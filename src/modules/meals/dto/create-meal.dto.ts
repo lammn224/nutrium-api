@@ -12,6 +12,7 @@ export class CreateMealDto extends PickType(Meals, [
   'glucid',
   'date',
   'foods',
+  'values',
   'school',
   'student',
   'isCreatedByAdmin',

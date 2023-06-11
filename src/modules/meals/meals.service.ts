@@ -108,18 +108,21 @@ export class MealsService {
 
   async findAll(user): Promise<Meals[]> {
     if (user.role === Role.Admin) {
-      const meals = await this.mealModel.find({
-        type: MealType.Launch,
-        school: user.school,
-        isCreatedByAdmin: true,
-        // createdBy: user._id,
-      });
+      const meals = await this.mealModel
+        .find({
+          type: MealType.Launch,
+          school: user.school,
+          isCreatedByAdmin: true,
+          // createdBy: user._id,
+        })
+        .populate({ path: 'foods' });
 
       return meals;
     } else if (user.role === Role.Parents) {
       const mealsByUser = await this.mealModel
         .find({ school: user.school, createdBy: user._id })
         .populate({ path: 'student' })
+        .populate({ path: 'foods' })
         .select('-deleted -createdAt -updatedAt');
 
       const mealsByAdmin = await this.mealModel.find({
@@ -137,6 +140,7 @@ export class MealsService {
           student: user._id,
         })
         .populate({ path: 'student' })
+        .populate({ path: 'foods' })
         .select('-deleted -createdAt -updatedAt');
 
       const mealsByAdmin = await this.mealModel
@@ -145,6 +149,7 @@ export class MealsService {
           type: MealType.Launch,
           createdBy: { $ne: user.parents },
         })
+        .populate({ path: 'foods' })
         .populate({ path: 'student' });
       return [...mealsByAdmin, ...mealsByParent];
     }
