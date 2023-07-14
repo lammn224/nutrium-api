@@ -115,7 +115,8 @@ export class MealsService {
           isCreatedByAdmin: true,
           // createdBy: user._id,
         })
-        .populate({ path: 'foods' });
+        .populate({ path: 'foods' })
+        .select('-deleted -createdAt -updatedAt');
 
       return meals;
     } else if (user.role === Role.Parents) {
@@ -125,11 +126,15 @@ export class MealsService {
         .populate({ path: 'foods' })
         .select('-deleted -createdAt -updatedAt');
 
-      const mealsByAdmin = await this.mealModel.find({
-        school: user.school,
-        type: MealType.Launch,
-        createdBy: { $ne: user._id },
-      });
+      const mealsByAdmin = await this.mealModel
+        .find({
+          school: user.school,
+          type: MealType.Launch,
+          createdBy: { $ne: user._id },
+        })
+        .populate({ path: 'student' })
+        .populate({ path: 'foods' })
+        .select('-deleted -createdAt -updatedAt');
 
       return [...mealsByAdmin, ...mealsByUser];
     } else {
@@ -150,7 +155,8 @@ export class MealsService {
           createdBy: { $ne: user.parents },
         })
         .populate({ path: 'foods' })
-        .populate({ path: 'student' });
+        .populate({ path: 'student' })
+        .select('-deleted -createdAt -updatedAt');
       return [...mealsByAdmin, ...mealsByParent];
     }
   }

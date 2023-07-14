@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/enums/role.enum';
 import { AuthApiError } from '@/decorators/api-error-response.decorator';
@@ -14,10 +23,9 @@ import { PaginationDto } from '@/dtos/pagination-response.dto';
 import { ScheduleExerciseService } from '@/modules/scheduleExercise/scheduleExercise.service';
 import { CreateScheduleExerciseDto } from '@/modules/scheduleExercise/dto/create-schedule-exercise.dto';
 import { ScheduleExercise } from '@/modules/scheduleExercise/scheduleExercise.schema';
-import { Meals } from '@/modules/meals/meals.schema';
 import { IdRequestDto } from '@/dtos/id-request.dto';
-import { UpdateMealDto } from '@/modules/meals/dto/update-meal.dto';
 import { UpdateScheduleExerciseDto } from '@/modules/scheduleExercise/dto/update-schedule-exercise.dto';
+import { TimestampDto } from '@/modules/meals/dto/timestamp.dto';
 
 @ApiExtraModels(PaginationDto)
 @ApiBearerAuth()
@@ -66,6 +74,21 @@ export class ScheduleExerciseController {
       idRequestDto.id,
       updateScheduleExerciseDto,
       req.user,
+    );
+  }
+
+  @Roles(Role.Parents, Role.Student)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Get meals by week' })
+  @Get('by-week-chart')
+  async getScheduleExerciseByWeek(
+    @Query() timestampDto: TimestampDto,
+    @Req() req,
+  ) {
+    return await this.scheduleExerciseService.getScheduleExerciseByWeek(
+      timestampDto.ts,
+      req.user,
+      timestampDto.studentId,
     );
   }
   //

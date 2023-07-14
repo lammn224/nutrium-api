@@ -6,23 +6,21 @@ import {
   ScheduleExerciseDocument,
 } from '@/modules/scheduleExercise/scheduleExercise.schema';
 import { CreateScheduleExerciseDto } from '@/modules/scheduleExercise/dto/create-schedule-exercise.dto';
-import {
-  throwBadRequest,
-  throwForbidden,
-  throwNotFound,
-} from '@/utils/exception.utils';
+import { throwBadRequest, throwNotFound } from '@/utils/exception.utils';
 import {
   ACTIVITY_NOT_EXISTED,
-  MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES,
-  MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES,
-  MEAL_NOT_UPDATED,
   SCHEDULE_EXISTED,
   SCHEDULE_NOT_EXISTED,
 } from '@/constants/error-codes.constant';
 import { Role } from '@/enums/role.enum';
 import { ActivityService } from '@/modules/activities/activity.service';
-import { MealType } from '@/enums/meal-type.enum';
 import { UpdateScheduleExerciseDto } from '@/modules/scheduleExercise/dto/update-schedule-exercise.dto';
+import {
+  convertTimeStampsToString,
+  dateToTimestamps,
+  endOfWeek,
+  startOfWeek,
+} from '@/utils/dateToTimestamps.utils';
 
 @Injectable()
 export class ScheduleExerciseService {
@@ -109,5 +107,116 @@ export class ScheduleExerciseService {
     await scheduleExercise.save();
 
     return scheduleExercise;
+  }
+
+  async getScheduleExerciseByWeek(
+    ts = Math.floor(Date.now() / 1000),
+    user,
+    studentId,
+  ) {
+    const date = new Date(
+      (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
+    );
+
+    const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
+    const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
+
+    const filter = {
+      $and: [
+        { date: { $gte: startDateOfWeekTs } },
+        { date: { $lte: endDateOfWeekTs } },
+      ],
+    };
+
+    const scheduleExercises = await this.scheduleExerciseModel
+      .find({
+        ...filter,
+        school: user.school,
+        student: studentId,
+      })
+      .populate({ path: 'activity' })
+      .sort({ type: 1 });
+
+    let res = null;
+
+    const chartData = {
+      mon: [],
+      tue: [],
+      wed: [],
+      thu: [],
+      fri: [],
+      sat: [],
+      sun: [],
+    };
+
+    const tableData = [
+      {
+        date: 'Thứ 2',
+        scheduleExercise: [],
+      },
+      {
+        date: 'Thứ 3',
+        scheduleExercise: [],
+      },
+      {
+        date: 'Thứ 4',
+        scheduleExercise: [],
+      },
+      {
+        date: 'Thứ 5',
+        scheduleExercise: [],
+      },
+      {
+        date: 'Thứ 6',
+        scheduleExercise: [],
+      },
+      {
+        date: 'Thứ 7',
+        scheduleExercise: [],
+      },
+      {
+        date: 'Chủ nhật',
+        scheduleExercise: [],
+      },
+    ];
+
+    scheduleExercises.forEach((e) => {
+      const date = new Date(e.date * 1000);
+
+      switch (date.toString().split(' ')[0]) {
+        case 'Mon':
+          chartData.mon.push(e);
+          tableData[0].scheduleExercise.push(e);
+          break;
+        case 'Tue':
+          chartData.tue.push(e);
+          tableData[1].scheduleExercise.push(e);
+          break;
+        case 'Wed':
+          chartData.wed.push(e);
+          tableData[2].scheduleExercise.push(e);
+          break;
+        case 'Thu':
+          chartData.thu.push(e);
+          tableData[3].scheduleExercise.push(e);
+          break;
+        case 'Fri':
+          chartData.fri.push(e);
+          tableData[4].scheduleExercise.push(e);
+          break;
+        case 'Sat':
+          chartData.sat.push(e);
+          tableData[5].scheduleExercise.push(e);
+          break;
+        case 'Sun':
+          chartData.sun.push(e);
+          tableData[6].scheduleExercise.push(e);
+          break;
+      }
+    });
+
+    res = { chartData, tableData };
+
+    return res;
   }
 }
