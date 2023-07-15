@@ -26,6 +26,7 @@ import { UpdateMealDto } from '@/modules/meals/dto/update-meal.dto';
 import { TimestampDto } from '@/modules/meals/dto/timestamp.dto';
 import { MealPerStudentDto } from '@/modules/meals/dto/meal-per-student.dto';
 import { CloneMealLastWeekDto } from '@/modules/meals/dto/clone-meal-last-week.dto';
+import { MealPerMonthDto } from '@/modules/meals/dto/meal-per-month.dto';
 
 @ApiTags('Meals')
 @ApiBearerAuth()
@@ -64,8 +65,15 @@ export class MealsController {
   @ApiOperation({ summary: 'Get all meals' })
   @ApiOkResponse({ type: [Meals] })
   @Get('all')
-  async findAll(@Req() req): Promise<Meals[]> {
-    return await this.mealsService.findAll(req.user);
+  async findAll(
+    @Query() mealPerMonthDto: MealPerMonthDto,
+    @Req() req,
+  ): Promise<Meals[]> {
+    return await this.mealsService.findAll(
+      req.user,
+      mealPerMonthDto.startMonth,
+      mealPerMonthDto.endMonth,
+    );
   }
 
   @Roles(Role.Admin, Role.Parents, Role.Student)

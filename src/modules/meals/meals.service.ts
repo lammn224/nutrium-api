@@ -106,10 +106,14 @@ export class MealsService {
     return meal;
   }
 
-  async findAll(user): Promise<Meals[]> {
+  async findAll(user, startMonth, endMonth): Promise<Meals[]> {
+    const filter = {
+      $and: [{ date: { $gte: startMonth } }, { date: { $lte: endMonth } }],
+    };
     if (user.role === Role.Admin) {
       const meals = await this.mealModel
         .find({
+          ...filter,
           type: MealType.Launch,
           school: user.school,
           isCreatedByAdmin: true,
@@ -121,13 +125,14 @@ export class MealsService {
       return meals;
     } else if (user.role === Role.Parents) {
       const mealsByUser = await this.mealModel
-        .find({ school: user.school, createdBy: user._id })
+        .find({ ...filter, school: user.school, createdBy: user._id })
         .populate({ path: 'student' })
         .populate({ path: 'foods' })
         .select('-deleted -createdAt -updatedAt');
 
       const mealsByAdmin = await this.mealModel
         .find({
+          ...filter,
           school: user.school,
           type: MealType.Launch,
           createdBy: { $ne: user._id },
@@ -140,6 +145,7 @@ export class MealsService {
     } else {
       const mealsByParent = await this.mealModel
         .find({
+          ...filter,
           school: user.school,
           createdBy: user.parents,
           student: user._id,
@@ -150,6 +156,7 @@ export class MealsService {
 
       const mealsByAdmin = await this.mealModel
         .find({
+          ...filter,
           school: user.school,
           type: MealType.Launch,
           createdBy: { $ne: user.parents },
@@ -157,6 +164,7 @@ export class MealsService {
         .populate({ path: 'foods' })
         .populate({ path: 'student' })
         .select('-deleted -createdAt -updatedAt');
+
       return [...mealsByAdmin, ...mealsByParent];
     }
   }
