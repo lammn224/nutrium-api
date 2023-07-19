@@ -4,7 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import mongoose, { Document, ObjectId } from 'mongoose';
 import * as MongooseDelete from 'mongoose-delete';
-import { SchoolUser } from '../school-users/school-user.schema';
+import {
+  SchoolUser,
+  SchoolUserSchema,
+} from '../school-users/school-user.schema';
 
 export type SchoolDocument = School & Document;
 
@@ -21,6 +24,9 @@ export class School {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'SchoolUser' })
   createdBy: string | SchoolUser;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'SchoolUser' })
+  manager: string | SchoolUser;
 
   @IsNotEmpty()
   @IsString()
@@ -50,6 +56,16 @@ SchoolSchema.plugin(MongooseDelete, {
   deletedAt: { type: Number },
   deleted: true,
   overrideMethods: OverrideMethods,
+});
+
+SchoolSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const school = this;
+
+  // @ts-ignore
+  school.name = school.name.trim();
+
+  return next();
 });
 
 SchoolSchema.set('toJSON', {

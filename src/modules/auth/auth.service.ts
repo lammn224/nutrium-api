@@ -8,6 +8,7 @@ import { LoginDto } from './dto/login.dto';
 import { StudentLoginDto } from '@/modules/auth/dto/login-students.dto';
 import { Student } from '@/modules/students/students.schema';
 import { StudentsService } from '@/modules/students/students.service';
+import { SysadminLoginDto } from '@/modules/auth/dto/login-sysadmin.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,22 @@ export class AuthService {
     private schoolService: SchoolsService,
     private jwtService: JwtService,
   ) {}
+
+  async validateSysadmin({
+    phoneNumber,
+    password,
+  }: SysadminLoginDto): Promise<any> {
+    const checkInfo = await this.schoolUsersService.attemptSysadmin(
+      phoneNumber,
+      password,
+    );
+
+    if (checkInfo.canReturnToken) {
+      delete checkInfo.user.password;
+    }
+
+    return checkInfo;
+  }
 
   async validateSchoolUser({
     phoneNumber,
@@ -75,6 +92,21 @@ export class AuthService {
       studentId: user.studentId,
       _id: user._id,
       school: user.school,
+      role: user.role,
+      sub: user._id,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload, {
+        expiresIn: parseInt(process.env.JWT_TTL),
+      }),
+    };
+  }
+
+  async sysadminLogin(user: SchoolUser) {
+    const payload = {
+      phoneNumber: user.phoneNumber,
+      _id: user._id,
       role: user.role,
       sub: user._id,
     };

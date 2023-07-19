@@ -10,6 +10,7 @@ import { SchoolsModule } from '../schools/schools.module';
 import { AuthValidationMiddleware } from './middlewares/auth-validation-middleware';
 import { StudentsLocalStrategy } from '@/modules/auth/students-local.strategy';
 import { StudentsModule } from '@/modules/students/students.module';
+import { SysadminLocalStrategy } from '@/modules/auth/sysadmin-local.strategy';
 
 @Module({
   imports: [
@@ -25,7 +26,13 @@ import { StudentsModule } from '@/modules/students/students.module';
     SchoolsModule,
     StudentsModule,
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, StudentsLocalStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    StudentsLocalStrategy,
+    SysadminLocalStrategy,
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })

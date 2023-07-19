@@ -30,6 +30,8 @@ import {
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { StudentLoginDto } from '@/modules/auth/dto/login-students.dto';
 import { StudentsLocalAuthGuard } from '@/modules/auth/students-local-auth.guard';
+import { SysadminLoginDto } from '@/modules/auth/dto/login-sysadmin.dto';
+import { SysadminLocalAuthGuard } from '@/modules/auth/sysadmin-local-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -91,6 +93,28 @@ export class AuthController {
     @Body() studentLoginDto: StudentLoginDto,
   ): Promise<LoginResponseDto> {
     const token = await this.authService.studentLogin(req.user);
+
+    return token;
+  }
+
+  @Public()
+  @UseGuards(SysadminLocalAuthGuard)
+  @AuthCodeResponse(
+    WRONG_USER_OR_PASSWORD,
+    INACTIVE,
+    BLOCKED,
+    DELETED,
+    USER_NOT_EXIST_OR_DELETED,
+  )
+  @ApiOkResponse({ type: LoginResponseDto })
+  @PublicApiError()
+  @ApiOperation({ summary: 'Login for sysadmin' })
+  @Post('login/sysadmin')
+  async loginSysadmin(
+    @Request() req,
+    @Body() sysadminLoginDto: SysadminLoginDto,
+  ): Promise<LoginResponseDto> {
+    const token = await this.authService.sysadminLogin(req.user);
 
     return token;
   }

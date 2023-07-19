@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import {
   PARENTS_ACCOUNT_EXISTED,
   PARENTS_ACCOUNT_NOT_FOUND,
+  PHONE_NUMBER_ALREADY_EXIST,
   USER_NOT_EXIST,
   USER_NOT_EXIST_OR_DELETED,
   WRONG_USER_OR_PASSWORD,
@@ -71,6 +72,10 @@ export class SchoolUsersService {
         throwNotFound(PARENTS_ACCOUNT_NOT_FOUND);
       }
 
+      if (isExistedParents.role === Role.Admin) {
+        throwBadRequest(PARENTS_ACCOUNT_NOT_FOUND);
+      }
+
       isExistedParents.child.push(newStudent);
       await isExistedParents.save();
 
@@ -111,6 +116,15 @@ export class SchoolUsersService {
     school: string,
     createSchoolUserDto: CreateSchoolUserDto,
   ): Promise<SchoolUser> {
+    const user = await this.schoolUserModel.findOne({
+      school,
+      phoneNumber: createSchoolUserDto.phoneNumber,
+    });
+
+    if (user) {
+      throwBadRequest(PHONE_NUMBER_ALREADY_EXIST);
+    }
+
     const newAdmin = await this.schoolUserModel.create({
       school,
       ...createSchoolUserDto,
@@ -167,6 +181,47 @@ export class SchoolUsersService {
         result = {
           canReturnToken: false,
           schoolUser,
+          status: WRONG_USER_OR_PASSWORD,
+        };
+      }
+    }
+
+    return result;
+  }
+
+  async attemptSysadmin(phoneNumber, password) {
+    const user = await this.schoolUserModel.findOne({
+      phoneNumber,
+      role: Role.Sysadmin,
+    });
+
+    let result = {
+      status: USER_NOT_EXIST_OR_DELETED,
+      canReturnToken: false,
+      user: null,
+    };
+
+    if (user) {
+      const matchPassword = await this.comparePassword(password, user.password);
+
+      if (matchPassword) {
+        if (user.status === UserStatus.active) {
+          result = {
+            canReturnToken: true,
+            user,
+            status: user.status,
+          };
+        } else {
+          result = {
+            canReturnToken: false,
+            user,
+            status: user.status,
+          };
+        }
+      } else {
+        result = {
+          canReturnToken: false,
+          user,
           status: WRONG_USER_OR_PASSWORD,
         };
       }
