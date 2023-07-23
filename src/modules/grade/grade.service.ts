@@ -39,6 +39,12 @@ export class GradeService {
   ): Promise<PaginationDto<Grade>> {
     const filter = {
       school: user.school,
+      ...(paginationRequestFullDto.keyword && {
+        name: {
+          $regex: `.*${paginationRequestFullDto.keyword}.*`,
+          $options: 'i',
+        },
+      }),
     };
 
     const total = await this.gradeModel.countDocuments(filter);

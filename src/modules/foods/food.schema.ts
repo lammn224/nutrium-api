@@ -3,8 +3,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import * as MongooseDelete from 'mongoose-delete';
+import { School } from '@/modules/schools/schools.schema';
 
 export type FoodDocument = Food & Document;
 
@@ -24,6 +25,15 @@ export class Food {
   @ApiProperty({ type: String, required: true })
   @Prop({ type: String, required: true })
   name: string;
+
+  @IsString()
+  @ApiProperty({ type: String })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: School.name,
+    default: null,
+  })
+  school: string | School;
 
   @IsNotEmpty()
   @IsNumber()

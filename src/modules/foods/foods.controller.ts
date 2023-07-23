@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { FoodsService } from './foods.service';
 import { CreateFoodDto } from './dto/create-food.dto';
@@ -39,12 +40,12 @@ export class FoodsController {
   @ApiOperation({ summary: 'Create new food' })
   @ApiCreatedResponse({ type: Food })
   @Post()
-  async create(@Body() createFoodDto: CreateFoodDto) {
-    return await this.foodsService.create(createFoodDto);
+  async create(@Body() createFoodDto: CreateFoodDto, @Req() req) {
+    return await this.foodsService.create(createFoodDto, req.user);
   }
 
   // filter with query
-  @Roles(Role.Admin, Role.Parents, Role.Student)
+  @Roles(Role.Admin, Role.Parents, Role.Student, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Get all foods with paging' })
   @PaginationResponse(Food)
@@ -52,8 +53,9 @@ export class FoodsController {
   @Get()
   async findAllWithFilter(
     @Query() queries: PaginationRequestFullDto,
+    @Req() req,
   ): Promise<PaginationDto<Food>> {
-    return await this.foodsService.findAllWithFilter(queries);
+    return await this.foodsService.findAllWithFilter(queries, req.user);
   }
 
   @Roles(Role.Admin, Role.Parents, Role.Student)
@@ -74,7 +76,7 @@ export class FoodsController {
     return await this.foodsService.findOne(id);
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Update one food' })
   @ApiOkResponse({ type: Food })
@@ -82,16 +84,17 @@ export class FoodsController {
   async updateOne(
     @Param('id') id: string,
     @Body() updateFoodDto: UpdateFoodDto,
+    @Req() req,
   ) {
-    return await this.foodsService.update(id, updateFoodDto);
+    return await this.foodsService.update(id, updateFoodDto, req.user);
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Delete one food' })
   @ApiOkResponse({ type: Food })
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return await this.foodsService.delete(id);
+  async delete(@Param('id') id: string, @Req() req) {
+    return await this.foodsService.delete(id, req.user);
   }
 }

@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   Req,
-  Request,
 } from '@nestjs/common';
 import { Roles } from '@/decorators/roles.decorator';
 import { Role } from '@/enums/role.enum';
@@ -48,7 +47,7 @@ export class ActivityController {
     return this.activityService.createActivity(createActivityDto);
   }
 
-  @Roles(Role.Admin, Role.Parents, Role.Student)
+  @Roles(Role.Admin, Role.Parents, Role.Student, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Get all activities' })
   @PaginationResponse(Activity)
@@ -84,29 +83,29 @@ export class ActivityController {
     );
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Update activities' })
   @ApiResponse({ type: Activity })
   @Patch(':id')
   async update(
     @Param() idRequestDto: IdRequestDto,
-    @Request() req,
     @Body() updateActivityDto: UpdateActivityDto,
+    @Req() req,
   ) {
     return await this.activityService.update(
-      req.user._id,
-      updateActivityDto,
       idRequestDto.id,
+      updateActivityDto,
+      req.user._id,
     );
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Delete activities' })
   @ApiOkResponse({ type: Activity })
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return await this.activityService.delete(id);
+  async delete(@Param('id') id: string, @Req() req) {
+    return await this.activityService.delete(id, req.user);
   }
 }

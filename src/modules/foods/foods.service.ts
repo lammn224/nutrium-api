@@ -1,5 +1,9 @@
-import { FOOD_NOT_EXIST } from '@/constants/error-codes.constant';
-import { throwNotFound } from '@/utils/exception.utils';
+import {
+  FOOD_CANNOT_DELETED,
+  FOOD_CANNOT_UPDATED,
+  FOOD_NOT_EXIST,
+} from '@/constants/error-codes.constant';
+import { throwBadRequest, throwNotFound } from '@/utils/exception.utils';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,18 +13,23 @@ import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 import { PaginationDto } from '@/dtos/pagination-response.dto';
 import { SortType } from '@/enums/sort.enum';
 import { UpdateFoodDto } from '@/modules/foods/dto/update-food.dto';
+import { Role } from '@/enums/role.enum';
 
 @Injectable()
 export class FoodsService {
   constructor(@InjectModel(Food.name) private foodModel: Model<FoodDocument>) {}
 
-  async create(createFoodDto: CreateFoodDto) {
-    const newFood = await this.foodModel.create({ ...createFoodDto });
+  async create(createFoodDto: CreateFoodDto, user) {
+    const newFood = await this.foodModel.create({
+      ...createFoodDto,
+      school: user.school,
+    });
     return newFood;
   }
 
   async findAllWithFilter(
     paginationRequestFullDto: PaginationRequestFullDto,
+    user,
   ): Promise<PaginationDto<Food>> {
     const filter = {
       ...(paginationRequestFullDto.keyword && {
@@ -35,14 +44,40 @@ export class FoodsService {
     sortObj[paginationRequestFullDto.sortBy] =
       paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
 
-    const total = await this.foodModel.countDocuments(filter);
+    let foods = [];
+    let total = 0;
 
-    const foods = await this.foodModel
-      .find(filter)
-      .select('-deleted -createdAt -updatedAt')
-      .sort(sortObj)
-      .skip(paginationRequestFullDto.offset)
-      .limit(paginationRequestFullDto.limit);
+    if (user.role === Role.Sysadmin) {
+      total = await this.foodModel.countDocuments({
+        school: null,
+        ...filter,
+      });
+
+      foods = await this.foodModel
+        .find({
+          school: null,
+          ...filter,
+        })
+        .select('-deleted -createdAt -updatedAt')
+        .sort(sortObj)
+        .skip(paginationRequestFullDto.offset)
+        .limit(paginationRequestFullDto.limit);
+    } else {
+      total = await this.foodModel.countDocuments({
+        $or: [{ school: null }, { school: user.school }],
+        ...filter,
+      });
+
+      foods = await this.foodModel
+        .find({
+          $or: [{ school: null }, { school: user.school }],
+          ...filter,
+        })
+        .select('-deleted -createdAt -updatedAt')
+        .sort(sortObj)
+        .skip(paginationRequestFullDto.offset)
+        .limit(paginationRequestFullDto.limit);
+    }
 
     return {
       total,
@@ -68,11 +103,15 @@ export class FoodsService {
     return food;
   }
 
-  async update(id: string, updateFoodDto: UpdateFoodDto) {
+  async update(id: string, updateFoodDto: UpdateFoodDto, user) {
     const food = await this.foodModel.findById(id);
 
     if (!food) {
       throwNotFound(FOOD_NOT_EXIST);
+    }
+
+    if (user.school && food.school != user.school) {
+      throwBadRequest(FOOD_CANNOT_UPDATED);
     }
 
     for (const key in updateFoodDto) {
@@ -84,11 +123,15 @@ export class FoodsService {
     return food;
   }
 
-  async delete(id: string) {
+  async delete(id: string, user) {
     const food = await this.foodModel.findById(id);
 
     if (!food) {
       throwNotFound(FOOD_NOT_EXIST);
+    }
+
+    if (user.school && food.school != user.school) {
+      throwBadRequest(FOOD_CANNOT_DELETED);
     }
 
     await food.delete();

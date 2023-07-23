@@ -25,9 +25,13 @@ export const GRADE_NOT_EXISTED = 'GRADE_NOT_EXISTED';
 //ACTIVITY
 export const ACTIVITY_EXISTED = 'ACTIVITY_EXISTED';
 export const ACTIVITY_NOT_EXISTED = 'ACTIVITY_NOT_EXISTED';
+export const ACTIVITY_CANNOT_UPDATED = 'ACTIVITY_CANNOT_UPDATED';
+export const ACTIVITY_CANNOT_DELETED = 'ACTIVITY_CANNOT_DELETED';
 
 //FOOD
 export const FOOD_NOT_EXIST = 'FOOD_NOT_EXIST';
+export const FOOD_CANNOT_UPDATED = 'FOOD_CANNOT_UPDATED';
+export const FOOD_CANNOT_DELETED = 'FOOD_CANNOT_DELETED';
 
 // FILE
 export const UPLOAD_FAILED = 'UPLOAD_FAILED';
@@ -71,6 +75,8 @@ export const ERROR_CODES = new Map<string, string>([
 
   // FOOD
   [FOOD_NOT_EXIST, 'Food is not exist'],
+  [FOOD_CANNOT_UPDATED, 'Food cannot be updated'],
+  [FOOD_CANNOT_DELETED, 'Food cannot be deleted'],
 
   // FILE
   [UPLOAD_FAILED, 'Upload fail, please check data again'],
@@ -91,6 +97,8 @@ export const ERROR_CODES = new Map<string, string>([
   // ACTIVITY
   [ACTIVITY_EXISTED, 'Activity is already existed'],
   [ACTIVITY_NOT_EXISTED, 'Activity is not existed'],
+  [ACTIVITY_CANNOT_UPDATED, 'Activity cannot be updated'],
+  [ACTIVITY_CANNOT_DELETED, 'Activity cannot be deleted'],
 
   // SCHEDULE EXERCISE
   [SCHEDULE_EXISTED, 'Schedule exercise is already existed'],
