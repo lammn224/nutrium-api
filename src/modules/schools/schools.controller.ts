@@ -1,5 +1,10 @@
 import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SchoolsService } from './schools.service';
 import { Public } from '@/decorators/public.decorator';
 import {
@@ -13,24 +18,15 @@ import {
   PaginationDto,
   PaginationResponse,
 } from '@/dtos/pagination-response.dto';
-import { Food } from '@/modules/foods/food.schema';
 import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 import { CreateSchoolDto } from '@/modules/schools/dto/create-school.dto';
+import { IdRequestDto } from '@/dtos/id-request.dto';
 
 @ApiTags('Schools')
+@ApiBearerAuth()
 @Controller('schools')
 export class SchoolsController {
   constructor(private readonly schoolsService: SchoolsService) {}
-
-  @Public()
-  @PublicApiError()
-  @ApiResponse({ type: School })
-  @ApiOperation({ summary: 'Get school' })
-  @Get(':code')
-  async findSchoolByCode(@Param('code') code: string) {
-    return await this.schoolsService.findSchoolByCode(code);
-  }
-
   @Roles(Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Get all school with filter' })
@@ -41,6 +37,15 @@ export class SchoolsController {
     @Query() queries: PaginationRequestFullDto,
   ): Promise<PaginationDto<School>> {
     return await this.schoolsService.findAllSchoolWithFilter(queries);
+  }
+
+  @Roles(Role.Sysadmin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Get all schools' })
+  @ApiResponse({ type: School })
+  @Get('/all')
+  async findAllSchool(): Promise<School[]> {
+    return await this.schoolsService.findAllSchool();
   }
 
   @Roles(Role.Sysadmin)
@@ -57,5 +62,30 @@ export class SchoolsController {
       req.user,
       createSchoolDto,
     );
+  }
+
+  @Roles(Role.Sysadmin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Approve school by sysadmin' })
+  @PaginationResponse(School)
+  @ApiResponse({ type: School })
+  @Post('/approve/:id')
+  async approveBySysadmin(
+    @Param() idRequestDto: IdRequestDto,
+    @Req() req,
+  ): Promise<School> {
+    return await this.schoolsService.approveBySysadmin(
+      req.user,
+      idRequestDto.id,
+    );
+  }
+
+  @Public()
+  @PublicApiError()
+  @ApiResponse({ type: School })
+  @ApiOperation({ summary: 'Get school' })
+  @Get(':code')
+  async findSchoolByCode(@Param('code') code: string) {
+    return await this.schoolsService.findSchoolByCode(code);
   }
 }

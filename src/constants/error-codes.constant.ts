@@ -13,6 +13,8 @@ export const PHONE_NUMBER_ALREADY_EXIST = 'PHONE_NUMBER_ALREADY_EXIST';
 export const PARENTS_ACCOUNT_NOT_FOUND = 'PARENTS_ACCOUNT_NOT_FOUND';
 export const PARENTS_ACCOUNT_EXISTED = 'PARENTS_ACCOUNT_EXISTED';
 export const STUDENT_ID_ALREADY_EXISTED = 'STUDENT_ID_ALREADY_EXISTED';
+export const CONTACT_SYSADMIN_TO_ACTIVE = 'CONTACT_SYSADMIN_TO_ACTIVE';
+export const PLEASE_CONFIRM = 'PLEASE_CONFIRM';
 
 // SCHOOL
 export const SCHOOL_NOT_EXIST = 'SCHOOL_NOT_EXIST';
@@ -58,6 +60,8 @@ export const ERROR_CODES = new Map<string, string>([
   [PARENTS_ACCOUNT_NOT_FOUND, 'Parents account is not found'],
   [PARENTS_ACCOUNT_EXISTED, 'Parents account is already existed'],
   [STUDENT_ID_ALREADY_EXISTED, 'Student ID is already existed'],
+  [CONTACT_SYSADMIN_TO_ACTIVE, 'Please contact sysadmin to access system'],
+  [PLEASE_CONFIRM, 'Please confirm by active code sent'],
 
   // SCHOOL
   [SCHOOL_NOT_EXIST, 'School is not exist'],

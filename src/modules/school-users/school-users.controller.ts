@@ -103,7 +103,26 @@ export class SchoolUsersController {
     );
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Sysadmin)
+  @AuthApiError()
+  @ApiOperation({ summary: 'Find all student with paging by sysadmin' })
+  @PaginationResponse(SchoolUser)
+  @Get('account')
+  async findAllWithFilterBySysadmin(
+    @Request() req,
+    @Query() queries: PaginationRequestFullDto,
+    @Query('schoolId') schoolId: string,
+    @Query('role') role: string,
+  ) {
+    return await this.schoolUsersService.findAllWithFilterBySysadmin(
+      req.user,
+      queries,
+      schoolId,
+      role,
+    );
+  }
+
+  @Roles(Role.Admin, Role.Sysadmin)
   @ApiNoContentResponse()
   @AuthApiError()
   @ApiOperation({ summary: 'Reset password' })

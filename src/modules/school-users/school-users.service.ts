@@ -354,6 +354,53 @@ export class SchoolUsersService {
     };
   }
 
+  async findAllWithFilterBySysadmin(
+    user,
+    paginationRequestFullDto: PaginationRequestFullDto,
+    schoolId: string,
+    role: string,
+  ): Promise<PaginationDto<SchoolUser>> {
+    const filter = {
+      school: schoolId,
+      ...(role && { role: role }),
+      ...(paginationRequestFullDto.keyword && {
+        $or: [
+          {
+            fullName: {
+              $regex: `.*${paginationRequestFullDto.keyword}.*`,
+              $options: 'i',
+            },
+          },
+          {
+            phoneNumber: {
+              $regex: `.*${paginationRequestFullDto.keyword}.*`,
+              $options: 'i',
+            },
+          },
+        ],
+      }),
+    };
+
+    // const sortObj = {};
+    // sortObj[paginationRequestFullDto.sortBy] =
+    //   paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.schoolUserModel.countDocuments(filter);
+
+    const students = await this.schoolUserModel
+      .find(filter)
+      .populate({ path: 'school' })
+      .select('-deleted -createdAt -updatedAt')
+      // .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: students,
+    };
+  }
+
   async resetPasswordByAdmin(_id: string, resetPasswordDto: ResetPasswordDto) {
     const parents = await this.schoolUserModel.findOne({ _id });
 

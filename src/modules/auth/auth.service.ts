@@ -9,6 +9,9 @@ import { StudentLoginDto } from '@/modules/auth/dto/login-students.dto';
 import { Student } from '@/modules/students/students.schema';
 import { StudentsService } from '@/modules/students/students.service';
 import { SysadminLoginDto } from '@/modules/auth/dto/login-sysadmin.dto';
+import { Status } from '@/enums/status.enum';
+import { throwBadRequest } from '@/utils/exception.utils';
+import { CONTACT_SYSADMIN_TO_ACTIVE } from '@/constants/error-codes.constant';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +43,12 @@ export class AuthService {
     password,
     school,
   }: LoginDto): Promise<any> {
+    const checkSchool = await this.schoolService.findSchoolById(school);
+
+    if (checkSchool.status === Status.Pending) {
+      throwBadRequest(CONTACT_SYSADMIN_TO_ACTIVE);
+    }
+
     const checkInfo = await this.schoolUsersService.attempt(
       phoneNumber,
       password,

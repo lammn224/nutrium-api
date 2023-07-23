@@ -1,13 +1,11 @@
 import { OverrideMethods } from '@/constants/override-method.constant';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import mongoose, { Document, ObjectId } from 'mongoose';
 import * as MongooseDelete from 'mongoose-delete';
-import {
-  SchoolUser,
-  SchoolUserSchema,
-} from '../school-users/school-user.schema';
+import { SchoolUser } from '../school-users/school-user.schema';
+import { Status } from '@/enums/status.enum';
 
 export type SchoolDocument = School & Document;
 
@@ -39,6 +37,15 @@ export class School {
   @ApiProperty({ type: String, required: true })
   @Prop({ type: String, required: true })
   name: string;
+
+  @ApiProperty({ enum: Status, default: Status.Pending })
+  @IsEnum(Status)
+  @Prop({
+    required: true,
+    enum: Status,
+    default: Status.Pending,
+  })
+  status: Status;
 
   @Prop({ type: Number })
   createdAt: number;

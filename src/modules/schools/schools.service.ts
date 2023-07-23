@@ -11,9 +11,9 @@ import {
 } from '@/constants/error-codes.constant';
 import { PaginationRequestFullDto } from '@/dtos/pagination-request.dto';
 import { PaginationDto } from '@/dtos/pagination-response.dto';
-import { Food } from '@/modules/foods/food.schema';
 import { SortType } from '@/enums/sort.enum';
 import { CreateSchoolDto } from '@/modules/schools/dto/create-school.dto';
+import { Status } from '@/enums/status.enum';
 
 @Injectable()
 export class SchoolsService {
@@ -31,9 +31,19 @@ export class SchoolsService {
     return school;
   }
 
+  async findSchoolById(schoolId: string | School) {
+    const school = await this.schoolModel.findById(schoolId);
+
+    if (!school) throwNotFound(SCHOOL_NOT_EXIST);
+
+    return school;
+  }
+
   async createSchool(registerDto: RegisterDto) {
     const newSchool = await this.schoolModel.create({
       ...registerDto,
+      // status: Status.Pending,
+      status: Status.Active,
     });
 
     const owner = await this.schoolUserService.createSchoolOwner(
@@ -54,6 +64,8 @@ export class SchoolsService {
   async createSchoolBySysadmin(user, createSchoolDto: CreateSchoolDto) {
     const newSchool = await this.schoolModel.create({
       ...createSchoolDto,
+      // status: Status.Pending,
+      status: Status.Active,
     });
 
     createSchoolDto.password = process.env.DEFAULT_PASSWORD;
@@ -67,6 +79,25 @@ export class SchoolsService {
     await newSchool.save();
 
     return newSchool;
+  }
+
+  async approveBySysadmin(user, schoolId) {
+    const school = await this.schoolModel.findById(schoolId);
+
+    if (!school) {
+      throwNotFound(SCHOOL_NOT_EXIST);
+    }
+
+    school.status = Status.Unconfirmed;
+    await school.save();
+
+    // tao active code
+    // active code expired
+    // save database
+
+    // gui tin nhan
+
+    return school;
   }
 
   async checkExist(key: string, value: string): Promise<boolean> {
@@ -108,7 +139,7 @@ export class SchoolsService {
 
     const total = await this.schoolModel.countDocuments(filter);
 
-    const foods = await this.schoolModel
+    const schools = await this.schoolModel
       .find(filter)
       .populate({ path: 'createdBy' })
       .populate({ path: 'manager' })
@@ -119,7 +150,17 @@ export class SchoolsService {
 
     return {
       total,
-      results: foods,
+      results: schools,
     };
+  }
+
+  async findAllSchool() {
+    const schools = await this.schoolModel
+      .find()
+      .populate({ path: 'createdBy' })
+      .populate({ path: 'manager' })
+      .select('-deleted -createdAt -updatedAt');
+
+    return schools;
   }
 }

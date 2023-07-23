@@ -262,6 +262,52 @@ export class StudentsService {
     };
   }
 
+  async findAllWithFilterBySysadmin(
+    user,
+    paginationRequestFullDto: PaginationRequestFullDto,
+    schoolId: string,
+  ): Promise<PaginationDto<Student>> {
+    const filter = {
+      school: schoolId,
+      ...(paginationRequestFullDto.keyword && {
+        $or: [
+          {
+            fullName: {
+              $regex: `.*${paginationRequestFullDto.keyword}.*`,
+              $options: 'i',
+            },
+          },
+          {
+            studentId: {
+              $regex: `.*${paginationRequestFullDto.keyword}.*`,
+              $options: 'i',
+            },
+          },
+        ],
+      }),
+    };
+
+    // const sortObj = {};
+    // sortObj[paginationRequestFullDto.sortBy] =
+    //   paginationRequestFullDto.sortType === SortType.asc ? 1 : -1;
+
+    const total = await this.studentModel.countDocuments(filter);
+
+    const students = await this.studentModel
+      .find(filter)
+      .populate({ path: 'school' })
+      .populate({ path: 'class' })
+      .select('-deleted -createdAt -updatedAt')
+      // .sort(sortObj)
+      .skip(paginationRequestFullDto.offset)
+      .limit(paginationRequestFullDto.limit);
+
+    return {
+      total,
+      results: students,
+    };
+  }
+
   async resetPasswordByAdmin(_id: string, resetPasswordDto: ResetPasswordDto) {
     const student = await this.studentModel.findOne({ _id });
 
@@ -334,6 +380,9 @@ export class StudentsService {
 
   async calcOverallWeightAndHeightByClass(user, gradeId) {
     const res = [];
+    if (gradeId === 'undefined') {
+      return res;
+    }
     const grade = await this.gradeService.findGradeById(user, gradeId);
 
     const classObj = await this.classesService.findAllClassesByGrade(grade._id);
