@@ -36,60 +36,60 @@ export class Food {
   school: string | School;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  power: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  power: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  protein: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  protein: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  lipid: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  lipid: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  glucid: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  glucid: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  ca: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  ca: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  fe: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  fe: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  fiber: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  fiber: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  zn: number;
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  zn: string;
 
   @Prop({ type: Number })
   createdAt: number;

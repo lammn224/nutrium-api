@@ -26,6 +26,7 @@ import { ScheduleExercise } from '@/modules/scheduleExercise/scheduleExercise.sc
 import { IdRequestDto } from '@/dtos/id-request.dto';
 import { UpdateScheduleExerciseDto } from '@/modules/scheduleExercise/dto/update-schedule-exercise.dto';
 import { TimestampDto } from '@/modules/meals/dto/timestamp.dto';
+import { ScheduledExercisePerMonthDto } from '@/modules/scheduleExercise/dto/scheduled-exercise-per-month.dto';
 
 @ApiExtraModels(PaginationDto)
 @ApiBearerAuth()
@@ -56,8 +57,15 @@ export class ScheduleExerciseController {
   @ApiOperation({ summary: 'Get all schedule exercise' })
   @ApiOkResponse({ type: [ScheduleExercise] })
   @Get()
-  async findAll(@Req() req): Promise<ScheduleExercise[]> {
-    return await this.scheduleExerciseService.findAll(req.user);
+  async findAll(
+    @Query() scheduledExercisePerMonthDto: ScheduledExercisePerMonthDto,
+    @Req() req,
+  ): Promise<ScheduleExercise[]> {
+    return await this.scheduleExerciseService.findAll(
+      req.user,
+      scheduledExercisePerMonthDto.startMonth,
+      scheduledExercisePerMonthDto.endMonth,
+    );
   }
 
   @Roles(Role.Student, Role.Parents)

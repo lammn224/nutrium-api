@@ -41,32 +41,60 @@ export class Meals {
   type: MealType;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
   power: number;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
   protein: number;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
   lipid: number;
 
   @IsNotEmpty()
-  @IsNumber()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
   glucid: number;
+
+  @IsNotEmpty()
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  ca: number;
+
+  @IsNotEmpty()
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  fe: number;
+
+  @IsNotEmpty()
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  fiber: number;
+
+  @IsNotEmpty()
+  @IsString()
+  // @Type(() => Number)
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  zn: number;
 
   @IsNotEmpty()
   @IsNumber()
@@ -84,6 +112,7 @@ export class Meals {
   @IsArray()
   @ApiProperty({ type: [Number] })
   @Prop({ type: [Number] })
+  // value as amount (gam)
   values: number[];
 
   @IsString()

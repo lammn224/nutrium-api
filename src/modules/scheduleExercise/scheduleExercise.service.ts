@@ -59,12 +59,16 @@ export class ScheduleExerciseService {
     return schedule;
   }
 
-  async findAll(user): Promise<ScheduleExercise[]> {
+  async findAll(user, startMonth, endMonth): Promise<ScheduleExercise[]> {
+    const filter = {
+      $and: [{ date: { $gte: startMonth } }, { date: { $lte: endMonth } }],
+    };
     let scheduleExercises = [];
     if (user.role === Role.Parents) {
       for (let i = 0; i < user.child.length; i++) {
         const scheduleExercisesEachChild = await this.scheduleExerciseModel
           .find({
+            ...filter,
             school: user.school,
             student: user.child[i],
           })
@@ -79,6 +83,7 @@ export class ScheduleExerciseService {
     } else if (user.role === Role.Student) {
       scheduleExercises = await this.scheduleExerciseModel
         .find({
+          ...filter,
           school: user.school,
           student: user._id,
         })
