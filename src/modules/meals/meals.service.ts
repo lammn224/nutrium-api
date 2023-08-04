@@ -189,16 +189,42 @@ export class MealsService {
     };
 
     if (user.role === Role.Admin) {
-      const mealsByAdmin = await this.mealModel
-        .find({
-          ...filter,
-          type: MealType.Launch,
-          school: user.school,
-          isCreatedByAdmin: true,
-        })
-        .sort({ type: 1 });
+      if (!studentId) {
+        const mealsByAdmin = await this.mealModel
+          .find({
+            ...filter,
+            type: MealType.Launch,
+            school: user.school,
+            isCreatedByAdmin: true,
+          })
+          .populate({ path: 'foods' })
+          .sort({ type: 1 });
 
-      meals = [...mealsByAdmin];
+        meals = [...mealsByAdmin];
+      } else {
+        const mealsByAdmin = await this.mealModel
+          .find({
+            ...filter,
+            type: MealType.Launch,
+            school: user.school,
+            isCreatedByAdmin: true,
+          })
+          .populate({ path: 'foods' })
+          .sort({ type: 1 });
+
+        const mealsForStudent = await this.mealModel
+          .find({
+            ...filter,
+            // createdBy: user._id,
+            school: user.school,
+            student: studentId,
+            isCreatedByAdmin: false,
+          })
+          .populate({ path: 'foods' })
+          .sort({ type: 1 });
+
+        meals = [...mealsByAdmin, ...mealsForStudent];
+      }
     } else if (user.role === Role.Parents) {
       const mealsByAdmin = await this.mealModel
         .find({
@@ -207,6 +233,7 @@ export class MealsService {
           school: user.school,
           isCreatedByAdmin: true,
         })
+        .populate({ path: 'foods' })
         .sort({ type: 1 });
 
       const mealsForStudent = await this.mealModel
@@ -217,6 +244,7 @@ export class MealsService {
           student: studentId,
           isCreatedByAdmin: false,
         })
+        .populate({ path: 'foods' })
         .sort({ type: 1 });
 
       meals = [...mealsByAdmin, ...mealsForStudent];
@@ -228,6 +256,7 @@ export class MealsService {
           school: user.school,
           isCreatedByAdmin: true,
         })
+        .populate({ path: 'foods' })
         .sort({ type: 1 });
 
       const mealsForStudent = await this.mealModel
@@ -238,12 +267,13 @@ export class MealsService {
           student: studentId,
           isCreatedByAdmin: false,
         })
+        .populate({ path: 'foods' })
         .sort({ type: 1 });
 
       meals = [...mealsByAdmin, ...mealsForStudent];
     }
 
-    const res = {
+    const chartData = {
       mon: [],
       tue: [],
       wed: [],
@@ -258,30 +288,30 @@ export class MealsService {
 
       switch (date.toString().split(' ')[0]) {
         case 'Mon':
-          res.mon.push(meal);
+          chartData.mon.push(meal);
           break;
         case 'Tue':
-          res.tue.push(meal);
+          chartData.tue.push(meal);
           break;
         case 'Wed':
-          res.wed.push(meal);
+          chartData.wed.push(meal);
           break;
         case 'Thu':
-          res.thu.push(meal);
+          chartData.thu.push(meal);
           break;
         case 'Fri':
-          res.fri.push(meal);
+          chartData.fri.push(meal);
           break;
         case 'Sat':
-          res.sat.push(meal);
+          chartData.sat.push(meal);
           break;
         case 'Sun':
-          res.sun.push(meal);
+          chartData.sun.push(meal);
           break;
       }
     });
 
-    return res;
+    return chartData;
   }
 
   async getMealsByWeekPerStudent(

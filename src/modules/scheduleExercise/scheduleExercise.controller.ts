@@ -85,9 +85,9 @@ export class ScheduleExerciseController {
     );
   }
 
-  @Roles(Role.Parents, Role.Student)
+  @Roles(Role.Parents, Role.Student, Role.Admin)
   @AuthApiError()
-  @ApiOperation({ summary: 'Get meals by week' })
+  @ApiOperation({ summary: 'Get scheduleExercise by week' })
   @Get('by-week-chart')
   async getScheduleExerciseByWeek(
     @Query() timestampDto: TimestampDto,
