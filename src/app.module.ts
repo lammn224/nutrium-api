@@ -31,6 +31,8 @@ import { GradeModule } from '@/modules/grade/grade.module';
 import { ActivityModule } from '@/modules/activities/activity.module';
 import { HealthCheckApiMiddleware } from '@/middlewares/health-check-api.middleware';
 import { ScheduleExerciseModule } from '@/modules/scheduleExercise/scheduleExercise.module';
+import { MealCompilationModule } from './modules/meal-compilation/meal-compilation.module';
+import { MomentProvider } from '@/providers/moment.provider';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -73,10 +75,12 @@ import { ScheduleExerciseModule } from '@/modules/scheduleExercise/scheduleExerc
     GradeModule,
     ActivityModule,
     ScheduleExerciseModule,
+    MealCompilationModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    MomentProvider,
     Logger,
     {
       provide: APP_GUARD,

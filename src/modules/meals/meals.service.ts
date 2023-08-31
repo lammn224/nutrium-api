@@ -13,20 +13,22 @@ import {
   MEAL_NOT_UPDATED,
 } from '@/constants/error-codes.constant';
 import { UpdateMealDto } from '@/modules/meals/dto/update-meal.dto';
-import {
-  convertTimeStampsToString,
-  dateToTimestamps,
-  endOfWeek,
-  startOfWeek,
-} from '@/utils/dateToTimestamps.utils';
 import { MealType } from '@/enums/meal-type.enum';
 import { StudentsService } from '@/modules/students/students.service';
+import { MealCompilationService } from '@/modules/meal-compilation/meal-compilation.service';
+import { Student } from '@/modules/students/students.schema';
+import * as moment from 'moment';
+import { UPDATE_MEAL_COMPILATION } from '@/constants/events';
+import { MealCompilationUpdateEvent } from '@/events/meal-compilation-update.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class MealsService {
   constructor(
     @InjectModel(Meals.name) private mealModel: Model<MealsDocument>,
     private readonly studentService: StudentsService,
+    private readonly mealCompilationService: MealCompilationService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(createMealDto: CreateMealDto, user) {
@@ -42,28 +44,51 @@ export class MealsService {
       throwBadRequest(MEAL_EXISTED);
     }
 
-    if (user.child) {
-      const studentId = user.child.find(
-        (item) => item.toString() === createMealDto.student,
-      );
-
-      const student = await this.studentService.findById(studentId);
-
-      if (createMealDto.type === MealType.Breakfast) {
-        if (createMealDto.power > student.maxBreakfastCalories) {
-          throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
-        }
-      } else if (createMealDto.type === MealType.Dinner) {
-        if (createMealDto.power > student.maxDinnerCalories) {
-          throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
-        }
-      }
-    }
+    // if (user.child) {
+    //   const studentId = user.child.find(
+    //     (item) => item.toString() === createMealDto.student,
+    //   );
+    //
+    //   const student = await this.studentService.findById(studentId);
+    //
+    //   if (createMealDto.type === MealType.Breakfast) {
+    //     if (createMealDto.power > student.maxBreakfastCalories) {
+    //       throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
+    //     }
+    //   } else if (createMealDto.type === MealType.Dinner) {
+    //     if (createMealDto.power > student.maxDinnerCalories) {
+    //       throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
+    //     }
+    //   }
+    // }
 
     const newMeal = await this.mealModel.create(createMealDto);
     newMeal.createdBy = user._id;
 
     await newMeal.save();
+
+    // create MealCompilation
+    if (user.role === Role.Parents) {
+      const mealsOneDay = await this.findMealsOneDay(
+        user.school,
+        createMealDto.student,
+        createMealDto.date,
+      );
+
+      if (mealsOneDay.length === 3) {
+        await this.mealCompilationService.create(
+          user.school,
+          createMealDto.student.toString(),
+          createMealDto.date,
+          mealsOneDay,
+        );
+      }
+    } else if (user.role === Role.Admin) {
+      this.eventEmitter.emit(
+        UPDATE_MEAL_COMPILATION,
+        new MealCompilationUpdateEvent(createMealDto.date, user.school),
+      );
+    }
 
     return newMeal;
   }
@@ -79,23 +104,23 @@ export class MealsService {
       throwForbidden(MEAL_NOT_UPDATED);
     }
 
-    if (user.child) {
-      const studentId = user.child.find(
-        (item) => item.toString() === updateMealDto.student,
-      );
-
-      const student = await this.studentService.findById(studentId);
-
-      if (updateMealDto.type === MealType.Breakfast) {
-        if (updateMealDto.power > student.maxBreakfastCalories) {
-          throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
-        }
-      } else if (updateMealDto.type === MealType.Dinner) {
-        if (updateMealDto.power > student.maxDinnerCalories) {
-          throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
-        }
-      }
-    }
+    // if (user.child) {
+    //   const studentId = user.child.find(
+    //     (item) => item.toString() === updateMealDto.student,
+    //   );
+    //
+    //   const student = await this.studentService.findById(studentId);
+    //
+    //   if (updateMealDto.type === MealType.Breakfast) {
+    //     if (updateMealDto.power > student.maxBreakfastCalories) {
+    //       throwBadRequest(MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES);
+    //     }
+    //   } else if (updateMealDto.type === MealType.Dinner) {
+    //     if (updateMealDto.power > student.maxDinnerCalories) {
+    //       throwBadRequest(MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES);
+    //     }
+    //   }
+    // }
 
     for (const key in updateMealDto) {
       meal[key] = updateMealDto[key];
@@ -103,7 +128,56 @@ export class MealsService {
 
     await meal.save();
 
+    // update MealCompilation
+    if (user.role === Role.Parents) {
+      const mealsOneDay = await this.findMealsOneDay(
+        user.school,
+        updateMealDto.student,
+        updateMealDto.date,
+      );
+
+      if (mealsOneDay.length === 3) {
+        await this.mealCompilationService.update(
+          user.school,
+          updateMealDto.student.toString(),
+          updateMealDto.date,
+          mealsOneDay,
+        );
+      }
+    } else if (user.role === Role.Admin) {
+      this.eventEmitter.emit(
+        UPDATE_MEAL_COMPILATION,
+        new MealCompilationUpdateEvent(updateMealDto.date, user.school),
+      );
+    }
     return meal;
+  }
+
+  async findMealsOneDay(
+    school: string,
+    student: string | Student,
+    date: number,
+  ): Promise<Meals[]> {
+    date = moment.unix(date).startOf('day').unix();
+    const filter = { date, school };
+
+    const mealsByUser = await this.mealModel
+      .find({ ...filter, student })
+      .populate({ path: 'student' })
+      .populate({ path: 'foods' })
+      .select('-deleted -createdAt -updatedAt');
+
+    const mealsByAdmin = await this.mealModel
+      .find({
+        ...filter,
+        type: MealType.Launch,
+        isCreatedByAdmin: true,
+      })
+      .populate({ path: 'student' })
+      .populate({ path: 'foods' })
+      .select('-deleted -createdAt -updatedAt');
+
+    return [...mealsByAdmin, ...mealsByUser];
   }
 
   async findAll(user, startMonth, endMonth): Promise<Meals[]> {
@@ -170,14 +244,16 @@ export class MealsService {
   }
 
   async getMealsByWeek(ts = Math.floor(Date.now() / 1000), user, studentId) {
-    const date = new Date(
-      (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
-    );
+    // const date = new Date(
+    //   (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
+    // );
+    // const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
+    // const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
 
-    const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
-    const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
+    // const date = moment.unix(ts).startOf('day').unix();
 
-    // const student = await this.studentService.findById(studentId);
+    const startDateOfWeekTs = moment.unix(ts).startOf('week').unix();
+    const endDateOfWeekTs = moment.unix(ts).endOf('week').unix();
 
     let meals;
 
@@ -185,6 +261,7 @@ export class MealsService {
       $and: [
         { date: { $gte: startDateOfWeekTs } },
         { date: { $lte: endDateOfWeekTs } },
+        { school: user.school },
       ],
     };
 
@@ -194,7 +271,7 @@ export class MealsService {
           .find({
             ...filter,
             type: MealType.Launch,
-            school: user.school,
+            // school: user.school,
             isCreatedByAdmin: true,
           })
           .populate({ path: 'foods' })
@@ -206,7 +283,7 @@ export class MealsService {
           .find({
             ...filter,
             type: MealType.Launch,
-            school: user.school,
+            // school: user.school,
             isCreatedByAdmin: true,
           })
           .populate({ path: 'foods' })
@@ -216,7 +293,7 @@ export class MealsService {
           .find({
             ...filter,
             // createdBy: user._id,
-            school: user.school,
+            // school: user.school,
             student: studentId,
             isCreatedByAdmin: false,
           })
@@ -230,7 +307,7 @@ export class MealsService {
         .find({
           ...filter,
           type: MealType.Launch,
-          school: user.school,
+          // school: user.school,
           isCreatedByAdmin: true,
         })
         .populate({ path: 'foods' })
@@ -240,7 +317,7 @@ export class MealsService {
         .find({
           ...filter,
           createdBy: user._id,
-          school: user.school,
+          // school: user.school,
           student: studentId,
           isCreatedByAdmin: false,
         })
@@ -253,7 +330,7 @@ export class MealsService {
         .find({
           ...filter,
           type: MealType.Launch,
-          school: user.school,
+          // school: user.school,
           isCreatedByAdmin: true,
         })
         .populate({ path: 'foods' })
@@ -263,7 +340,7 @@ export class MealsService {
         .find({
           ...filter,
           createdBy: user.parents,
-          school: user.school,
+          // school: user.school,
           student: studentId,
           isCreatedByAdmin: false,
         })
@@ -272,6 +349,25 @@ export class MealsService {
 
       meals = [...mealsByAdmin, ...mealsForStudent];
     }
+
+    // student || parents
+    let mealCompiltaions;
+    if (
+      (user.role === Role.Student ||
+        user.role === Role.Parents ||
+        user.role === Role.Admin) &&
+      studentId
+    ) {
+      mealCompiltaions =
+        await this.mealCompilationService.findMealCompilationByWeek(
+          ts,
+          user,
+          studentId,
+        );
+    } else if (user.role === Role.Admin && !studentId) {
+      mealCompiltaions = [];
+    }
+    // find MealCompilations of week
 
     const chartData = {
       mon: [],
@@ -283,35 +379,120 @@ export class MealsService {
       sun: [],
     };
 
+    const chartDataExpected = {
+      mon: {
+        meals: [],
+        mealCompilation: null,
+      },
+      tue: {
+        meals: [],
+        mealCompilation: null,
+      },
+      wed: {
+        meals: [],
+        mealCompilation: null,
+      },
+      thu: {
+        meals: [],
+        mealCompilation: null,
+      },
+      fri: {
+        meals: [],
+        mealCompilation: null,
+      },
+      sat: {
+        meals: [],
+        mealCompilation: null,
+      },
+      sun: {
+        meals: [],
+        mealCompilation: null,
+      },
+    };
+
     meals.forEach((meal) => {
       const date = new Date(meal.date * 1000);
+      const dayName = date.toString().split(' ')[0].toLowerCase();
 
-      switch (date.toString().split(' ')[0]) {
-        case 'Mon':
+      switch (dayName) {
+        case 'mon':
+          chartDataExpected.mon.meals.push(meal);
+          break;
+        case 'tue':
+          chartDataExpected.tue.meals.push(meal);
+          break;
+        case 'wed':
+          chartDataExpected.wed.meals.push(meal);
+          break;
+        case 'thu':
+          chartDataExpected.thu.meals.push(meal);
+          break;
+        case 'fri':
+          chartDataExpected.fri.meals.push(meal);
+          break;
+        case 'sat':
+          chartDataExpected.sat.meals.push(meal);
+          break;
+        case 'sun':
+          chartDataExpected.sun.meals.push(meal);
+          break;
+      }
+
+      switch (dayName) {
+        case 'mon':
           chartData.mon.push(meal);
           break;
-        case 'Tue':
+        case 'tue':
           chartData.tue.push(meal);
           break;
-        case 'Wed':
+        case 'wed':
           chartData.wed.push(meal);
           break;
-        case 'Thu':
+        case 'thu':
           chartData.thu.push(meal);
           break;
-        case 'Fri':
+        case 'fri':
           chartData.fri.push(meal);
           break;
-        case 'Sat':
+        case 'sat':
           chartData.sat.push(meal);
           break;
-        case 'Sun':
+        case 'sun':
           chartData.sun.push(meal);
           break;
       }
     });
 
-    return chartData;
+    mealCompiltaions.forEach((mealCompiltaion) => {
+      const date = new Date(mealCompiltaion.date * 1000);
+      const dayName = date.toString().split(' ')[0].toLowerCase();
+
+      switch (dayName) {
+        case 'mon':
+          chartDataExpected.mon.mealCompilation = mealCompiltaion;
+          break;
+        case 'tue':
+          chartDataExpected.tue.mealCompilation = mealCompiltaion;
+          break;
+        case 'wed':
+          chartDataExpected.wed.mealCompilation = mealCompiltaion;
+          break;
+        case 'thu':
+          chartDataExpected.thu.mealCompilation = mealCompiltaion;
+          break;
+        case 'fri':
+          chartDataExpected.fri.mealCompilation = mealCompiltaion;
+          break;
+        case 'sat':
+          chartDataExpected.sat.mealCompilation = mealCompiltaion;
+          break;
+        case 'sun':
+          chartDataExpected.sun.mealCompilation = mealCompiltaion;
+          break;
+      }
+    });
+    // return { ...chartData, chartDataExpected };
+    return { ...chartDataExpected };
   }
 
   async getMealsByWeekPerStudent(
@@ -319,12 +500,16 @@ export class MealsService {
     studentId,
     user,
   ) {
-    const date = new Date(
-      (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
-    );
+    // const date = new Date(
+    //   (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
+    // );
+    // const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
+    // const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
 
-    const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
-    const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
+    // const date = moment.unix(ts).startOf('day').unix();
+
+    const startDateOfWeekTs = moment.unix(ts).startOf('week').unix();
+    const endDateOfWeekTs = moment.unix(ts).endOf('week').unix();
 
     const student = await this.studentService.findById(studentId);
 
@@ -501,5 +686,25 @@ export class MealsService {
     }
 
     return res;
+  }
+
+  async updateCompilationEvents(payload: MealCompilationUpdateEvent) {
+    const school = payload.school;
+    const date = payload.date;
+
+    const listStudents = await this.studentService.findAll(school);
+
+    for (const stu of listStudents) {
+      const mealsOneDay = await this.findMealsOneDay(school, stu, date);
+      if (mealsOneDay.length === 3) {
+        console.log('student in updateCompilationEvents', stu);
+        await this.mealCompilationService.create(
+          school,
+          stu._id.toString(),
+          date,
+          mealsOneDay,
+        );
+      }
+    }
   }
 }

@@ -7,9 +7,9 @@ import { StudentsService } from '@/modules/students/students.service';
 import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import { Role } from '@/enums/role.enum';
 import { UserGender } from '@/modules/school-users/enum/user-gender.enum';
-import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
+import * as moment from 'moment';
 
 @Injectable()
 export class FilesService {
@@ -24,6 +24,7 @@ export class FilesService {
   async readExcelFile(filename: string, grade: string, filePath: string, user) {
     const workbook = await new Excel.Workbook().xlsx.readFile(filePath);
     const worksheets = workbook.worksheets;
+    const formatStr = 'DD/MM/YYYY';
 
     for (const sheet of worksheets) {
       const session = await this.connection.startSession();
@@ -57,7 +58,10 @@ export class FilesService {
               row.values[4].toLowerCase() == 'nam'
                 ? UserGender.male
                 : UserGender.female,
-            dateOfBirth: await dateToTimestamps(row.values[5].toString()),
+            // dateOfBirth: await dateToTimestamps(row.values[5].toString()),
+            dateOfBirth: moment(row.values[5].toString(), formatStr)
+              .startOf('day')
+              .unix(),
             status: UserStatus.active,
             school: user.school,
             role: Role.Student,

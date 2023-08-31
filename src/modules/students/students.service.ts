@@ -23,6 +23,7 @@ import { SortType } from '@/enums/sort.enum';
 import { ResetPasswordDto } from '@/dtos/reset-password.dto';
 import { CreateStudentDto } from '@/modules/students/dto/create-student.dto';
 import { Role } from '@/enums/role.enum';
+import { School } from '@/modules/schools/schools.schema';
 
 @Injectable()
 export class StudentsService {
@@ -262,6 +263,18 @@ export class StudentsService {
     };
   }
 
+  async findAll(school: string | School): Promise<Student[]> {
+    const filter = {
+      school: school,
+    };
+
+    const students = await this.studentModel
+      .find(filter)
+      .select('-deleted -createdAt -updatedAt');
+
+    return students;
+  }
+
   async findAllWithFilterBySysadmin(
     user,
     paginationRequestFullDto: PaginationRequestFullDto,
@@ -336,6 +349,22 @@ export class StudentsService {
         student['maxDinnerCalories'] =
           Math.round((updateStudentInfoDto.rcmCalories * 0.25 + 1.5) * 100) /
           100;
+        //  rcmMildGainWeight, rcmMildLossWeight...
+        student['rcmMildWeightGainCalories'] = Number(
+          (updateStudentInfoDto.rcmCalories * 1.12).toFixed(2),
+        ); // (gain 0.25kg/week)
+        student['rcmWeightGainCalories'] = Number(
+          (updateStudentInfoDto.rcmCalories * 1.23).toFixed(2),
+        ); // (gain 0.50kg/week)
+        student['rcmFastWeightGainCalories'] = Number(
+          (updateStudentInfoDto.rcmCalories * 1.47).toFixed(2),
+        ); // (gain 1.00kg/week)
+        student['rcmMildWeightLossCalories'] = Number(
+          (updateStudentInfoDto.rcmCalories * 0.88).toFixed(2),
+        ); // (loss 0.25kg/week)
+        student['rcmWeightLossCalories'] = Number(
+          (updateStudentInfoDto.rcmCalories * 0.77).toFixed(2),
+        ); // (loss 0.50kg/week)
       }
       student[key] = updateStudentInfoDto[key];
     }
@@ -436,11 +465,16 @@ export class StudentsService {
           Math.round(
             ((student.weight * 10000) / (student.height * student.height)) * 10,
           ) / 10;
+
+        // random activityType
+        // => calculate rcmCalories, maxBreakfastCalories, maxDinnerCalories
         student.save();
       } else {
         student.activityType = array[Math.floor(Math.random() * array.length)];
         student.height = this.generateRandom(155, 165);
         student.weight = this.generateRandom(42, 55);
+        // random activityType
+        // => calculate rcmCalories, maxBreakfastCalories, maxDinnerCalories
         student.save();
       }
     });

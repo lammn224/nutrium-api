@@ -105,7 +105,7 @@ export class SchoolUsersController {
 
   @Roles(Role.Sysadmin)
   @AuthApiError()
-  @ApiOperation({ summary: 'Find all student with paging by sysadmin' })
+  @ApiOperation({ summary: 'Find all school-users with paging by sysadmin' })
   @PaginationResponse(SchoolUser)
   @Get('account')
   async findAllWithFilterBySysadmin(

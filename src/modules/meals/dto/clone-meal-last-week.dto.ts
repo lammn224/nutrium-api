@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsObject } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
 
 export class CloneMealLastWeekDto {
   @ApiProperty({ type: Object, required: true, default: null })

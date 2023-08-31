@@ -15,12 +15,7 @@ import {
 import { Role } from '@/enums/role.enum';
 import { ActivityService } from '@/modules/activities/activity.service';
 import { UpdateScheduleExerciseDto } from '@/modules/scheduleExercise/dto/update-schedule-exercise.dto';
-import {
-  convertTimeStampsToString,
-  dateToTimestamps,
-  endOfWeek,
-  startOfWeek,
-} from '@/utils/dateToTimestamps.utils';
+import * as moment from 'moment/moment';
 
 @Injectable()
 export class ScheduleExerciseService {
@@ -119,12 +114,16 @@ export class ScheduleExerciseService {
     user,
     studentId,
   ) {
-    const date = new Date(
-      (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
-    );
+    // const date = new Date(
+    //   (await dateToTimestamps(convertTimeStampsToString(ts))) * 1000,
+    // );
+    // const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
+    // const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
 
-    const startDateOfWeekTs = Math.floor(startOfWeek(date).getTime() / 1000);
-    const endDateOfWeekTs = Math.floor(endOfWeek(date).getTime() / 1000);
+    // const date = moment.unix(ts).startOf('day').unix();
+
+    const startDateOfWeekTs = moment.unix(ts).startOf('week').unix();
+    const endDateOfWeekTs = moment.unix(ts).endOf('week').unix();
 
     const filter = {
       $and: [

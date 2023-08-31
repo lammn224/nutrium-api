@@ -130,7 +130,7 @@ export class FoodsService {
       throwNotFound(FOOD_NOT_EXIST);
     }
 
-    if (user.school && food.school != user.school) {
+    if (user.school && food.school.toString() != user.school.toString()) {
       throwBadRequest(FOOD_CANNOT_DELETED);
     }
 

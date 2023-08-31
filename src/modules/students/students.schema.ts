@@ -13,6 +13,7 @@ import { UserStatus } from '@/modules/school-users/enum/user-status.enum';
 import { SchoolUser } from '@/modules/school-users/school-user.schema';
 import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
 import { ActivityType } from '@/modules/students/enum/activity-type.enum';
+import { Type } from 'class-transformer';
 
 export type StudentDocument = Student & Document;
 
@@ -55,6 +56,7 @@ export class Student {
   })
   role: Role;
 
+  @Type(() => Number)
   @IsNumber()
   @ApiProperty({ type: Number, required: true })
   @Prop({ type: Number, required: true })
@@ -65,23 +67,47 @@ export class Student {
   @Prop({ enum: UserGender, default: UserGender.male })
   gender: UserGender;
 
+  @Type(() => Number)
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })
   weight: number;
 
+  @Type(() => Number)
   @IsNumber()
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })
   height: number;
 
+  @Type(() => Number)
   @IsNumber()
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })
   bmi: number;
 
+  @Type(() => Number)
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })
   rcmCalories: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  rcmMildWeightGainCalories: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  rcmWeightGainCalories: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  rcmFastWeightGainCalories: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  rcmMildWeightLossCalories: number;
+
+  @ApiProperty({ type: Number })
+  @Prop({ type: Number, default: 0 })
+  rcmWeightLossCalories: number;
 
   @ApiProperty({ type: Number })
   @Prop({ type: Number, default: 0 })

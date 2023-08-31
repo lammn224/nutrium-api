@@ -45,6 +45,9 @@ export const MEAL_HAS_OVERCOME_MAX_BREAKFAST_CALORIES =
 export const MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES =
   'MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES';
 
+// MEAL_COMPILATION
+export const MEAL_COMPILATION_NOT_EXISTED = 'MEAL_COMPILATION_NOT_EXISTED';
+
 // SCHEDULE EXERCISE
 export const SCHEDULE_EXISTED = 'SCHEDULE_EXISTED';
 export const SCHEDULE_NOT_EXISTED = 'SCHEDULE_NOT_EXISTED';
@@ -93,6 +96,9 @@ export const ERROR_CODES = new Map<string, string>([
     MEAL_HAS_OVERCOME_MAX_DINNER_CALORIES,
     'Meal has overcome dinner calories limit',
   ],
+
+  // MEAL_COMPILATION
+  [MEAL_COMPILATION_NOT_EXISTED, 'Meal compilation is not existed'],
 
   // ACTIVITY
   [ACTIVITY_EXISTED, 'Activity is already existed'],

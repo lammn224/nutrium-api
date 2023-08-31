@@ -10,7 +10,6 @@ import {
   ACTIVITY_CANNOT_UPDATED,
   ACTIVITY_EXISTED,
   ACTIVITY_NOT_EXISTED,
-  FOOD_CANNOT_UPDATED,
 } from '@/constants/error-codes.constant';
 import {
   Activity,

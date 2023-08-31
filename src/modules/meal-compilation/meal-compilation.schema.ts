@@ -3,21 +3,17 @@ import mongoose, { Document, ObjectId } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
-import { MealType } from '@/enums/meal-type.enum';
-import { Type } from 'class-transformer';
-import { Food } from '@/modules/foods/food.schema';
 import { dateToTimestamps } from '@/utils/dateToTimestamps.utils';
 import { Student } from '@/modules/students/students.schema';
 import { School } from '@/modules/schools/schools.schema';
-import { SchoolUser } from '@/modules/school-users/school-user.schema';
+import { Meals } from '@/modules/meals/meals.schema';
 
-export type MealsDocument = Meals & Document;
+export type MealCompilationDocument = MealCompilation & Document;
 
 @Schema({
   timestamps: {
@@ -26,75 +22,9 @@ export type MealsDocument = Meals & Document;
     currentTime: () => Date.now(),
   },
 })
-export class Meals {
+export class MealCompilation {
   @ApiProperty({ type: String, required: true })
   _id: string | ObjectId;
-
-  @ApiProperty({ enum: MealType, default: MealType.Launch })
-  @IsNotEmpty()
-  @IsEnum(MealType)
-  @Prop({
-    required: true,
-    enum: MealType,
-    default: MealType.Launch,
-  })
-  type: MealType;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  power: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  protein: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  lipid: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  glucid: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  ca: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  fe: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  fiber: number;
-
-  @IsNotEmpty()
-  // @IsString()
-  @Type(() => Number)
-  @ApiProperty({ type: Number, required: true })
-  @Prop({ type: Number, required: true })
-  zn: number;
 
   @IsNotEmpty()
   @IsNumber()
@@ -105,15 +35,90 @@ export class Meals {
   @IsNotEmpty()
   @IsArray()
   @ApiProperty({ type: [String] })
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Food.name })
-  foods: Food[];
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: Meals.name })
+  meals: Meals[];
+
+  // @IsNotEmpty()
+  // @IsString()
+  // @ApiProperty({ type: String, required: true })
+  // @Prop({ type: String, required: true })
+  // recommend: string;
 
   @IsNotEmpty()
-  @IsArray()
-  @ApiProperty({ type: [Number] })
-  @Prop({ type: [Number] })
-  // value as amount (gam)
-  values: number[];
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  recommendStable: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  recommendMildWeightGain: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  recommendWeightGain: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  recommendFastWeightGain: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  recommendMildWeightLoss: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  recommendWeightLoss: string;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalPower: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalProtein: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalLipid: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalGlucid: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalCa: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalFe: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalFiber: number;
+
+  @IsNotEmpty()
+  @ApiProperty({ type: Number, required: true })
+  @Prop({ type: Number, required: true })
+  totalZn: number;
 
   @IsString()
   @IsNotEmpty()
@@ -126,17 +131,6 @@ export class Meals {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Student.name })
   student: string | Student;
 
-  @IsOptional()
-  @ApiProperty({ type: String })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: SchoolUser.name })
-  createdBy: string | SchoolUser;
-
-  // @IsOptional()
-  @IsNotEmpty()
-  @ApiProperty({ type: Boolean })
-  @Prop({ type: Boolean, default: false })
-  isCreatedByAdmin: boolean;
-
   @Prop({ type: Number })
   createdAt: number;
 
@@ -147,9 +141,10 @@ export class Meals {
   deletedAt?: number;
 }
 
-export const MealsSchema = SchemaFactory.createForClass(Meals);
+export const MealCompilationSchema =
+  SchemaFactory.createForClass(MealCompilation);
 
-MealsSchema.pre('save', async function (next) {
+MealCompilationSchema.pre('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const meal = this;
 
@@ -164,14 +159,14 @@ MealsSchema.pre('save', async function (next) {
   return next();
 });
 
-MealsSchema.set('toJSON', {
+MealCompilationSchema.set('toJSON', {
   transform: function (doc, ret, opt) {
     delete ret['__v'];
     return ret;
   },
 });
 
-MealsSchema.set('toObject', {
+MealCompilationSchema.set('toObject', {
   transform: function (doc, ret, opt) {
     delete ret['__v'];
     return ret;
