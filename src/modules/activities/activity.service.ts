@@ -42,9 +42,10 @@ export class ActivityService {
   async findAllWithPaging(
     user,
     paginationRequestFullDto: PaginationRequestFullDto,
+    level: string,
   ): Promise<PaginationDto<Activity>> {
     const filter = {
-      // school: user.school,
+      ...(level && { level }),
       ...(paginationRequestFullDto.keyword && {
         name: {
           $regex: `.*${paginationRequestFullDto.keyword}.*`,

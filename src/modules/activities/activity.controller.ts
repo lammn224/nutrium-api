@@ -54,9 +54,14 @@ export class ActivityController {
   @Get()
   async findAllWithFilter(
     @Query() queries: PaginationRequestFullDto,
+    @Query('level') level: string,
     @Req() req,
   ): Promise<PaginationDto<Activity>> {
-    return await this.activityService.findAllWithPaging(req.user, queries);
+    return await this.activityService.findAllWithPaging(
+      req.user,
+      queries,
+      level,
+    );
   }
 
   @Roles(Role.Admin, Role.Parents, Role.Student)

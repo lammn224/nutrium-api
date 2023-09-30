@@ -5,4 +5,5 @@ export class CreateActivityDto extends PickType(Activity, [
   'name',
   'metIdx',
   'school',
+  'level',
 ] as const) {}

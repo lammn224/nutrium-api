@@ -33,6 +33,12 @@ export class Activity {
   @Prop({ type: Number, required: true })
   metIdx: number;
 
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ type: String, required: true })
+  @Prop({ type: String, required: true })
+  level: string;
+
   @IsString()
   @ApiProperty({ type: String })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: School.name })
