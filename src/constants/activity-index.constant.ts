@@ -1,7 +1,7 @@
-export const NONE = 'NONE';
-export const LIGHT = 'LIGHT';
-export const MODERATE = 'MODERATE';
-export const HEAVY = 'HEAVY';
+export const NONE = 'none';
+export const LIGHT = 'light';
+export const MODERATE = 'moderate';
+export const HEAVY = 'heavy';
 
 export const activityIdx = new Map<string, number>([
   [NONE, 1.2],

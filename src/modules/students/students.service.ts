@@ -24,6 +24,7 @@ import { ResetPasswordDto } from '@/dtos/reset-password.dto';
 import { CreateStudentDto } from '@/modules/students/dto/create-student.dto';
 import { Role } from '@/enums/role.enum';
 import { School } from '@/modules/schools/schools.schema';
+import { activityIdx } from '@/constants/activity-index.constant';
 
 @Injectable()
 export class StudentsService {
@@ -453,30 +454,121 @@ export class StudentsService {
   }
 
   async randomData() {
-    const array = ['none', 'light', 'moderate', 'heavy'];
-    const students = await this.studentModel.find({});
+    const activityTypeArray = ['none', 'light', 'moderate', 'heavy'];
+    const students = await this.studentModel.find({}).populate({
+      path: 'class',
+    });
 
     students.forEach((student) => {
       if (student.gender === UserGender.male) {
-        student.activityType = array[Math.floor(Math.random() * array.length)];
-        student.height = this.generateRandom(170, 185);
-        student.weight = this.generateRandom(58, 70);
+        student.activityType =
+          activityTypeArray[
+            Math.floor(Math.random() * activityTypeArray.length)
+          ];
+
+        // 170 - 185
+        // 58 - 75
+
+        if (
+          // @ts-ignore
+          student.class.name.startsWith('6') ||
+          // @ts-ignore
+          student.class.name.startsWith('7')
+        ) {
+          student.height = this.generateRandom(170, 175);
+          student.weight = this.generateRandom(58, 65);
+        } else if (
+          // @ts-ignore
+          student.class.name.startsWith('8')
+        ) {
+          student.height = this.generateRandom(176, 180);
+          student.weight = this.generateRandom(66, 70);
+        } else {
+          student.height = this.generateRandom(181, 185);
+          student.weight = this.generateRandom(71, 75);
+        }
+
         student.bmi =
           Math.round(
             ((student.weight * 10000) / (student.height * student.height)) * 10,
           ) / 10;
 
-        // random activityType
-        // => calculate rcmCalories, maxBreakfastCalories, maxDinnerCalories
-        student.save();
+        student.rcmCalories = Math.floor(
+          (66.47 +
+            13.75 * student.weight +
+            5.003 * student.height -
+            6.755 *
+              (new Date().getFullYear() -
+                new Date(student.dateOfBirth * 1000).getFullYear())) *
+            activityIdx.get(student.activityType),
+        );
       } else {
-        student.activityType = array[Math.floor(Math.random() * array.length)];
-        student.height = this.generateRandom(155, 165);
-        student.weight = this.generateRandom(42, 55);
-        // random activityType
-        // => calculate rcmCalories, maxBreakfastCalories, maxDinnerCalories
-        student.save();
+        student.activityType =
+          activityTypeArray[
+            Math.floor(Math.random() * activityTypeArray.length)
+          ];
+
+        // 155 - 165
+        // 42 - 55
+
+        if (
+          // @ts-ignore
+          student.class.name.startsWith('6') ||
+          // @ts-ignore
+          student.class.name.startsWith('7')
+        ) {
+          student.height = this.generateRandom(155, 158);
+          student.weight = this.generateRandom(42, 45);
+        } else if (
+          // @ts-ignore
+          student.class.name.startsWith('8')
+        ) {
+          student.height = this.generateRandom(159, 162);
+          student.weight = this.generateRandom(46, 50);
+        } else {
+          student.height = this.generateRandom(163, 165);
+          student.weight = this.generateRandom(51, 55);
+        }
+
+        student.bmi =
+          Math.round(
+            ((student.weight * 10000) / (student.height * student.height)) * 10,
+          ) / 10;
+
+        student.rcmCalories = Math.floor(
+          (655.1 +
+            9.563 * student.weight +
+            1.85 * student.height -
+            4.676 *
+              (new Date().getFullYear() -
+                new Date(student.dateOfBirth * 1000).getFullYear())) *
+            activityIdx.get(student.activityType),
+        );
       }
+
+      student['maxBreakfastCalories'] =
+        Math.round((student.rcmCalories * 0.4 + 1.5) * 100) / 100;
+      student['maxDinnerCalories'] =
+        Math.round((student.rcmCalories * 0.25 + 1.5) * 100) / 100;
+      student['rcmMildWeightGainCalories'] = Number(
+        (student.rcmCalories * 1.12).toFixed(2),
+      ); // (gain 0.25kg/week)
+      student['rcmWeightGainCalories'] = Number(
+        (student.rcmCalories * 1.23).toFixed(2),
+      ); // (gain 0.50kg/week)
+      student['rcmFastWeightGainCalories'] = Number(
+        (student.rcmCalories * 1.47).toFixed(2),
+      ); // (gain 1.00kg/week)
+      student['rcmMildWeightLossCalories'] = Number(
+        (student.rcmCalories * 0.88).toFixed(2),
+      ); // (loss 0.25kg/week)
+      student['rcmWeightLossCalories'] = Number(
+        (student.rcmCalories * 0.77).toFixed(2),
+      ); // (loss 0.50kg/week)
+
+      // console.log(student);
+
+      student.save();
     });
 
     return 'oke';
