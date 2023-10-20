@@ -566,8 +566,6 @@ export class StudentsService {
         (student.rcmCalories * 0.77).toFixed(2),
       ); // (loss 0.50kg/week)
 
-      // console.log(student);
-
       student.save();
     });
 

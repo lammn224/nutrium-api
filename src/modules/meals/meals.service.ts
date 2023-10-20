@@ -697,7 +697,7 @@ export class MealsService {
     for (const stu of listStudents) {
       const mealsOneDay = await this.findMealsOneDay(school, stu, date);
       if (mealsOneDay.length === 3) {
-        console.log('student in updateCompilationEvents', stu);
+        // console.log('student in updateCompilationEvents', stu);
         await this.mealCompilationService.create(
           school,
           stu._id.toString(),
