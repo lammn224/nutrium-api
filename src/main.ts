@@ -94,6 +94,6 @@ async function bootstrap() {
     region: configService.get('AWS_REGION'),
   });
 
-  await app.listen(3000);
+  await app.listen(3000, '0.0.0.0');
 }
 bootstrap();
