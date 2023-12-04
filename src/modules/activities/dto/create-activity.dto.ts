@@ -4,6 +4,5 @@ import { Activity } from '@/modules/activities/activity.schema';
 export class CreateActivityDto extends PickType(Activity, [
   'name',
   'metIdx',
-  'school',
   'level',
-] as const) {}
+]) {}

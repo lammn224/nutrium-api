@@ -41,7 +41,11 @@ export class Activity {
 
   @IsString()
   @ApiProperty({ type: String })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: School.name })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: School.name,
+    default: null,
+  })
   school: string | School;
 
   @Prop({ type: Number })

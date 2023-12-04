@@ -35,7 +35,7 @@ import { UpdateFoodDto } from '@/modules/foods/dto/update-food.dto';
 export class FoodsController {
   constructor(private readonly foodsService: FoodsService) {}
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Create new food' })
   @ApiCreatedResponse({ type: Food })
@@ -67,7 +67,7 @@ export class FoodsController {
     return await this.foodsService.findAll();
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Get one food' })
   @ApiOkResponse({ type: Food })

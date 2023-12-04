@@ -24,10 +24,10 @@ export class ActivityService {
   constructor(
     @InjectModel(Activity.name) private activityModel: Model<ActivityDocument>,
   ) {}
-  async createActivity(createActivityDto: CreateActivityDto) {
+  async createActivity(createActivityDto: CreateActivityDto, user) {
     const isExistedActivity = await this.activityModel.findOne({
       name: createActivityDto.name,
-      school: createActivityDto.school,
+      school: user.school,
     });
     if (isExistedActivity) throwBadRequest(ACTIVITY_EXISTED);
 

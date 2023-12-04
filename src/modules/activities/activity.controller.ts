@@ -38,13 +38,13 @@ import { ActivityService } from '@/modules/activities/activity.service';
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Create one activities' })
   @ApiResponse({ type: Activity })
   @Post()
-  create(@Body() createActivityDto: CreateActivityDto) {
-    return this.activityService.createActivity(createActivityDto);
+  create(@Body() createActivityDto: CreateActivityDto, @Req() req) {
+    return this.activityService.createActivity(createActivityDto, req.user);
   }
 
   @Roles(Role.Admin, Role.Parents, Role.Student, Role.Sysadmin)
@@ -73,7 +73,7 @@ export class ActivityController {
     return await this.activityService.findAll();
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Sysadmin)
   @AuthApiError()
   @ApiOperation({ summary: 'Get one activities' })
   @ApiOkResponse({ type: Activity })

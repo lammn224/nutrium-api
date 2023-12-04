@@ -45,6 +45,7 @@ import { MomentProvider } from '@/providers/moment.provider';
         store: redisStore,
         host: configService.get('REDIS_HOST'),
         port: configService.get<number>('REDIS_PORT'),
+        // url: 'rediss://red-ckoddulih1lc73eogcfg:o7udzJbfUIARFxwlkZrMBR3FDOtZkgDZ@singapore-redis.render.com',
       }),
       inject: [ConfigService],
     }),
